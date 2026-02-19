@@ -35,7 +35,16 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true; // 로그인된 사용자는 접근 가능
         }
 
-        // 3. /auth/** 요청 처리
+        // 3. /comments/** 경로는 로그인된 사용자만 접근 가능
+        if (requestUri.startsWith("/comments")) {
+            if (userId == null) {
+                response.sendRedirect("/auth/login");
+                return false;
+            }
+            return true; // 로그인된 사용자는 접근 가능
+        }
+
+        // 4. /auth/** 요청 처리
         if (requestUri.startsWith("/auth")) {
             if (userId != null) {
                 // 로그인된 사용자는 /posts로 리다이렉트
@@ -45,13 +54,13 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true; // 로그인 안 된 사용자는 /auth 하위 경로 접근 가능
         }
 
-        // 4. 로그인하지 않은 경우, 다른 요청은 차단
+        // 5. 로그인하지 않은 경우, 다른 요청은 차단
         if (userId == null) {
             response.sendRedirect("/auth/logout");
             return false;
         }
 
-        // 5. /users/** 경로는 관리자만 접근 가능
+        // 6. /users/** 경로는 관리자만 접근 가능
         if (requestUri.startsWith("/users")) {
             String role = (String) request.getSession().getAttribute("role");
             if (role == null || !"ADMIN".equals(role)) {
@@ -60,7 +69,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
 
-        // 6. 모든 조건 통과 → 요청 허용
+        // 7. 모든 조건 통과 → 요청 허용
         return true;
     }
 }
