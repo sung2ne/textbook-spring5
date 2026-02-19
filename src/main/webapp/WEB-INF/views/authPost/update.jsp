@@ -22,7 +22,6 @@
             <div class="col-12">
                 <%-- 게시글 수정 --%>
                 <form id="updateForm" action="/auth-posts/${post.id}/update" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" id="secret" name="secret" value="${post.secret}">
                     <div class="card mb-3">
                         <div class="card-header">
                             게시글 수정 (<span class="text-danger">*</span> 표시는 필수항목입니다.)
@@ -41,18 +40,7 @@
                                 <textarea class="form-control" id="content" name="content" rows="5" placeholder="내용을 입력하세요">${post.content}</textarea>
                             </div>
                             <%--// 내용 --%>
-
-                            <%-- 비밀글 --%>
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="isSecret" id="isSecret" value="false">
-                                    <label class="form-check-label text-danger" for="isSecret">
-                                        비밀글
-                                    </label>
-                                </div>
-                            </div>
-                            <%--// 비밀글 --%>
-
+                            
                             <%-- 첨부파일 --%>
                             <c:if test="${not empty post.fileName}">
                                 <div class="mb-3">
@@ -92,15 +80,6 @@
     <%@ include file="../base/script.jsp" %>
     <script>
         $(document).ready(function() {
-            // secret 초기값
-            $('#isSecret').prop('checked', $('#secret').val() === 'Y');
-
-            // 비밀글 체크 여부
-            $("#isSecret").on("change", function() {
-                // 체크되면 secret을 Y로, 아니면 N으로 설정
-                $("#secret").val($(this).prop("checked") ? "Y" : "N");
-            });
-
             // TinyMCE 초기화
             tinymce.init({
                 selector: '#content',
