@@ -57,6 +57,26 @@
                     </div>
                 </div>
                 <%--// 게시글 보기 --%>
+
+                <%-- 댓글 등록 --%>
+                <form id="commentCreateForm">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <%-- 내용 --%>
+                            <div class="mb-3">
+                                <textarea class="form-control" id="createContent" name="createContent" rows="5" placeholder="댓글 내용을 입력하세요"></textarea>
+                            </div>
+                            <%--// 내용 --%>
+                        </div>
+                        <div class="card-footer">
+                            <div>
+                                <button type="submit" class="btn btn-primary">댓글 등록</button>
+                                <button type="button" class="btn btn-secondary" id="cancelCreateComment">등록 취소</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <%--// 댓글 등록 --%>
             </div>
         </div>
         <%--// 페이지 내용 --%>
@@ -104,6 +124,60 @@
 
     <%-- 자바스크립트 --%>
     <%@ include file="../base/script.jsp" %>
+    <script>
+        $(document).ready(function() {
+            // 댓글 등록 취소
+            $('#cancelCreateComment').on('click', function() {
+                $('#createContent').val('');
+            });
+
+            // 댓글 등록 폼 검증
+            $('#commentCreateForm').validate({
+                rules: {
+                    createContent: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 1000
+                    }
+                },
+                messages: {
+                    createContent: {
+                        required: '댓글을 입력하세요.',
+                        minlength: '댓글은 최소 2자 이상 입력하세요.',
+                        maxlength: '댓글은 최대 1000자 이하로 입력하세요.'
+                    }
+                },
+                errorClass: 'is-invalid',
+                validClass: 'is-valid',
+                errorPlacement: function(error, element) {
+                    error.addClass('invalid-feedback');
+                    element.closest('.mb-3').append(error);
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: '/comments/create',
+                        type: 'POST',
+                        data: {
+                            'authPostId': '${post.id}',
+                            'content': $('#createContent').val()
+                        },
+                        success: function(response) {
+                            if (response.result == 'ok') {
+                                $('#createContent').val('');
+                                alert('댓글이 등록되었습니다.');
+                            } else {
+                                alert('댓글 등록에 실패했습니다.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert('댓글 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
     <%--// 자바스크립트 --%>
 </body>
 </html>
