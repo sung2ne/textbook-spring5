@@ -66,4 +66,46 @@
         ]]>
     </select>
 
+    <!--
+        댓글 단건 조회
+        - ID를 기준으로 조회
+        - LIMIT 1: 1건만 반환
+    -->
+    <select id="read" resultMap="commentResultMap">
+        <![CDATA[
+        SELECT
+            A.id,
+            A.auth_post_id,
+            A.content,
+            A.user_id,
+            A.created_at,
+            A.updated_at,
+            B.username,
+            B.email,
+            B.phone
+        FROM
+            comments AS A
+            INNER JOIN users AS B
+            ON A.user_id = B.user_id
+        WHERE
+            A.id=#{id}
+        LIMIT 1
+        ]]>
+    </select>
+
+    <!--
+        댓글 수정 쿼리
+        - 댓글 ID(PK)를 기준으로 CONTENT 수정함
+        - parameterType: 수정할 게시글 데이터를 담은 CommentDto 객체
+        - LIMIT 1: MySQL에서 다수의 행 수정 방지를 위한 안전장치
+    -->
+    <update id="update" parameterType="com.example.spring.comment.CommentDto">
+        <![CDATA[
+        UPDATE comments
+        SET content = #{content}
+        WHERE id = #{id}
+        LIMIT 1
+        ]]>
+    </update>
+
 </mapper>

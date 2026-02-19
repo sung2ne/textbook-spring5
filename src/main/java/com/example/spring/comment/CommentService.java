@@ -38,4 +38,24 @@ public class CommentService {
         List<CommentDto> comments = commentDao.list(authPostId);
         return comments;
     }
+
+    /**
+     * 특정 댓글을 조회하는 메서드
+     * @param id 조회할 댓글의 ID
+     * @return 댓글(CommentDto) 객체, 없으면 null
+     */
+    public CommentDto read(int id) {
+        // DAO를 통해 ID에 해당하는 게시글을 조회
+        return commentDao.read(id);
+    }
+
+    /**
+     * 댓글을 수정하는 메서드
+     * @param post 수정할 댓글 정보
+     * @return 수정 성공 여부 (true: 성공, false: 실패)
+     */
+    public boolean update(CommentDto comment) {
+        int result = commentDao.update(comment);
+        return result > 0;
+    }
 }

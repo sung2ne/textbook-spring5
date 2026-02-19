@@ -59,4 +59,45 @@ public class CommentDao {
 
         return comments;
     }
+
+    /**
+     * 댓글을 조회하는 메서드
+     *
+     * @param id 게시글 번호
+     * @return 댓글 리스트 (List<CommentDto>), 실패 시 null 또는 빈 리스트 반환
+     */
+    public CommentDto read(int id) {
+        CommentDto comment = null;
+
+        try {
+            // MyBatis 매퍼(commentMapper.xml)의 read 쿼리 실행
+            comment = sqlSession.selectOne("commentMapper.read", id);
+        } catch (DataAccessException e) {
+            // 예외 발생 시 로그 출력
+            logger.error("댓글 조회 오류 : {}", e.getMessage(), e);
+        }
+
+        return comment;
+    }
+
+    /**
+     * 댓글을 수정하는 메서드
+     * MyBatis 매퍼(commentMapper.update)를 호출하여 댓글 정보를 DB에 반영함
+     *
+     * @param post 수정할 댓글 정보 (ID 포함)
+     * @return 수정된 행 수 (성공 시 1, 실패 또는 오류 시 -1)
+     */
+    public int update(CommentDto comment) {
+        int result = -1;
+
+        try {
+            // commentMapper.xml의 <update id="update"> 구문 실행
+            result = sqlSession.update("commentMapper.update", comment);
+        } catch (DataAccessException e) {
+            // SQL 실행 중 오류 발생 시 로그 출력
+            logger.error("댓글 수정 오류 : {}", e.getMessage(), e);
+        }
+
+        return result;
+    }
 }
