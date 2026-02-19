@@ -33,4 +33,14 @@ public class PostService {
         int result = postDao.create(post);
         return result > 0; // 1개 이상 행이 삽입되면 성공으로 판단
     }
+
+    /**
+     * 특정 게시글을 조회하는 메서드
+     * @param id 조회할 게시글의 ID
+     * @return 게시글(PostDto) 객체, 없으면 null
+     */
+    public PostDto read(int id) {
+        // DAO를 통해 ID에 해당하는 게시글을 조회
+        return postDao.read(id);
+    }
 }
