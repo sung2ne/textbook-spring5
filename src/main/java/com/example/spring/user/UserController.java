@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -57,5 +58,27 @@ public class UserController {
 
         // user/list.jsp 뷰 렌더링
         return "user/list";
+    }
+
+    /**
+     * 사용자 상세보기 화면 요청 처리 (GET 방식)
+     * - 사용자 ID를 통해 사용자 정보를 조회하여 화면에 전달
+     *
+     * @param userId 조회할 사용자 ID (URL 경로 변수)
+     * @param model 조회한 사용자 정보를 뷰에 전달하기 위한 객체
+     * @return 사용자 상세보기 화면 뷰 이름 ("user/read.jsp")
+     */
+    @GetMapping("/{userId}")
+    public String readGet(@PathVariable("userId") String userId, Model model) {
+        // 사용자 ID로 사용자 정보 조회
+        UserDto user = new UserDto();
+        user.setUserId(userId);
+        user = userService.read(user);
+
+        // 조회한 사용자 정보를 모델에 담아 뷰로 전달
+        model.addAttribute("user", user);
+
+        // 사용자 상세보기 화면 렌더링
+        return "user/read";
     }
 }
