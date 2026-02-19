@@ -124,7 +124,20 @@
                     userId: {
                         required: true,
                         minlength: 6,
-                        maxlength: 20
+                        maxlength: 12,
+                        remote: {
+                            url: '/auth/check-user-id',
+                            type: 'post',
+                            data: {
+                                userId: function() {
+                                    return $('#userId').val();
+                                },
+                            },
+                            dataFilter: function(response) {
+                                const data = JSON.parse(response);
+                                return !data.exists;
+                            }
+                        }
                     },
                     password: {
                         required: true,
@@ -152,7 +165,8 @@
                     userId: {
                         required: '아이디를 입력하세요.',
                         minlength: '아이디는 6자 이상 12자 이하로 입력하세요.',
-                        maxlength: '아이디는 6자 이상 12자 이하로 입력하세요.'
+                        maxlength: '아이디는 6자 이상 12자 이하로 입력하세요.',
+                        remote: '이미 사용중인 아이디입니다.'
                     },
                     password: {
                         required: '비밀번호를 입력하세요.',
@@ -188,6 +202,6 @@
             });
         });
     </script>
-    <%--// 자바스크립트 --%>
+    <%--// script --%>
 </body>
 </html>

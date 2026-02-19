@@ -1,14 +1,20 @@
 package com.example.spring.auth;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.spring.user.UserDto;
@@ -215,5 +221,29 @@ public class AuthController {
         }
 
         return "redirect:/auth/login";
+    }
+
+    /**
+     * 사용자 아이디 중복 체크 (POST 방식, AJAX 처리)
+     * - 클라이언트에서 입력한 아이디가 이미 존재하는지 확인
+     * - JSON 형태로 결과 반환: { "exists": true } 또는 { "exists": false }
+     *
+     * @param user 아이디(UserDto.userId)를 포함한 사용자 객체
+     * @return JSON 응답 (exists: true/false)
+     */
+    @PostMapping("/check-user-id")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkUserIdPost(UserDto user) {
+        // 입력된 아이디 기준으로 사용자 조회
+        UserDto existsUser = userService.read(user);
+
+        // 응답용 데이터 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("exists", existsUser != null);
+
+        // JSON 형식으로 결과 반환
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 }
