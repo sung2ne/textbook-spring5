@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.spring.libs.Pagination;
+
 /**
  * 게시글 관련 비즈니스 로직을 처리하는 서비스 클래스
  * 컨트롤러와 DAO 사이에서 중간 역할을 수행
@@ -37,27 +39,40 @@ public class PostService {
     }
 
     /**
-     * 게시글 목록을 조회하고 검색 조건을 함께 반환하는 메서드
-     * - 검색 조건이 있을 경우 필터링된 결과를 조회
-     * - 검색 조건이 없을 경우 전체 게시글을 조회
-     * - 검색 조건과 결과 목록을 Map 형태로 반환하여 뷰에서 사용 가능
+     * 게시글 목록을 조회하고 검색 조건 및 페이징 정보를 함께 반환하는 메서드
      *
-     * @param searchType 검색 기준 (예: "title", "content", "username")
-     * @param searchKeyword 검색어 (null 또는 빈 문자열이면 전체 목록 조회)
-     * @return 게시글 목록 및 검색 조건을 담은 Map<String, Object>
+     * - 검색 조건이 주어지면 해당 조건(title, content, username 등)에 따라 게시글을 필터링
+     * - 전체 게시글 수(totalCount)를 기반으로 Pagination 객체를 생성
+     * - 계산된 offset을 이용하여 해당 페이지의 게시글만 조회
+     * - 검색 조건과 게시글 목록을 Map 형태로 반환하여 뷰에서 쉽게 사용 가능
+     *
+     * @param currentPage 현재 페이지 번호
+     * @param listCountPerPage 한 페이지에 보여줄 게시글 수
+     * @param pageCountPerPage 한 번에 보여줄 페이지 번호 수 (예: 하단에 5개씩)
+     * @param searchType 검색 기준 ("title", "content", "username", "all")
+     * @param searchKeyword 검색어 (null 또는 빈 문자열이면 전체 조회)
+     * @return Map<String, Object> 형태의 결과
      *         - posts: 게시글 리스트 (List<PostDto>)
-     *         - searchType: 사용자가 입력한 검색 기준
-     *         - searchKeyword: 사용자가 입력한 검색어
+     *         - searchType: 검색 기준 (뷰에서 유지)
+     *         - searchKeyword: 검색어 (뷰에서 유지)
+     *         - pagination: 페이지네이션 정보 (페이지 버튼 출력용)
      */
-    public Map<String, Object> list(String searchType, String searchKeyword) {
-        // 게시글 목록 조회
-        List<PostDto> posts = postDao.list(searchType, searchKeyword);
+    public Map<String, Object> list(int currentPage, int listCountPerPage, int pageCountPerPage, String searchType, String searchKeyword) {
+        // 검색 조건에 따른 전체 게시글 수 조회
+        int totalCount = postDao.totalCount(searchType, searchKeyword);
 
-        // 결과 맵 생성 및 데이터 추가
+        // 페이지네이션 객체 생성 (총 게시글 수 기반으로 계산)
+        Pagination pagination = new Pagination(currentPage, listCountPerPage, pageCountPerPage, totalCount);
+
+        // 페이징 정보에 따른 게시글 목록 조회 (LIMIT offset, count)
+        List<PostDto> posts = postDao.list(pagination.offset(), listCountPerPage, searchType, searchKeyword);
+
+        // 결과 데이터 맵 구성
         Map<String, Object> result = new HashMap<>();
         result.put("posts", posts);
         result.put("searchType", searchType);
         result.put("searchKeyword", searchKeyword);
+        result.put("pagination", pagination); // 뷰에서 페이지 번호 출력에 사용
 
         return result;
     }
