@@ -1,8 +1,10 @@
 package com.example.spring.auth;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder; // 비밀번호 암호화 도구 (BCrypt 등)
 
     /**
      * 회원가입 화면 요청 처리 (GET 방식)
@@ -161,5 +166,35 @@ public class AuthController {
     public String login(HttpServletRequest request) {
         // 사용자에게 로그인 폼 제공
         return "auth/login";
+    }
+
+    /**
+     * 로그인 요청 처리 (POST 방식)
+     * - 사용자 ID와 비밀번호를 검증하고 로그인 성공 시 세션에 정보 저장
+     *
+     * @param user 로그인 폼에서 입력된 사용자 정보 (userId, password)
+     * @param request HTTP 요청 객체 (세션 접근용)
+     * @param redirectAttributes 리다이렉트 시 메시지를 담기 위한 객체
+     * @return 로그인 성공 시 마이페이지로 이동, 실패 시 로그인 페이지로 리다이렉트
+     */
+    @PostMapping("/login")
+    public String loginPost(UserDto user, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        // 사용자 정보 조회 (userId 기준)
+        UserDto existsUser = userService.read(user);
+
+        // 사용자 존재 여부 및 비밀번호 검증
+        if (existsUser != null && passwordEncoder.matches(user.getPassword(), existsUser.getPassword())) {
+            // 세션에 로그인 정보 저장
+            HttpSession session = request.getSession(true);
+            session.setAttribute("userId", existsUser.getUserId());
+            session.setAttribute("username", existsUser.getUsername());
+            session.setAttribute("role", existsUser.getRole());
+
+            return "redirect:/profile"; // /profile 로 이동
+        }
+
+        // 로그인 실패: 에러 메시지와 함께 로그인 페이지로 리다이렉트
+        redirectAttributes.addFlashAttribute("errorMessage", "아이디 또는 비밀번호가 일치하지 않습니다.");
+        return "redirect:/auth/login";
     }
 }
