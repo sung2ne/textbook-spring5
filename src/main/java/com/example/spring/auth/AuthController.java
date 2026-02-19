@@ -113,4 +113,47 @@ public class AuthController {
         // 비밀번호 초기화 화면 제공
         return "auth/resetPassword";
     }
+
+    /**
+     * 비밀번호 초기화 요청 처리 (POST 방식)
+     * - 사용자 정보를 기반으로 사용자 존재 여부 확인
+     * - 존재하는 경우 임시 비밀번호(6자리 숫자)로 비밀번호를 재설정하고 암호화 후 저장
+     * - 초기화 결과에 따라 성공/실패 메시지를 FlashAttribute로 전달
+     *
+     * @param user 사용자 조회를 위한 정보 (이름 + 전화번호 or 이메일)
+     * @param request HTTP 요청 객체
+     * @param redirectAttributes 리다이렉트 시 메시지를 전달할 객체
+     * @return 로그인 페이지 또는 초기화 폼으로 리다이렉트
+     */
+    @PostMapping("/reset-password")
+    public String resetPasswordPost(UserDto user, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        // 세션에 userId가 존재하면 로그인 상태로 판단
+        if (request.getSession().getAttribute("userId") != null) {
+            // 이미 로그인된 사용자는 게시글 목록 페이지로 이동
+            return "redirect:/posts";
+        }
+
+        // 사용자 정보 조회
+        UserDto existsUser = userService.read(user);
+
+        if (existsUser != null) {
+            // 6자리 임시 비밀번호 생성
+            int iValue = (int)(Math.random() * 1000000);
+            String newPassword = String.format("%06d", iValue); // 앞자리 0 포함되도록
+
+            // 비밀번호 초기화 및 업데이트
+            existsUser.setPassword(newPassword);
+            boolean result = userService.update(existsUser);
+
+            if (result) {
+                redirectAttributes.addFlashAttribute("successMessage", "임시 비밀번호는 " + newPassword + " 입니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 초기화에 실패했습니다.");
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "사용자를 찾을 수 없습니다.");
+        }
+
+        return "redirect:/auth/reset-password";
+    }
 }
