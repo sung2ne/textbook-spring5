@@ -1,36 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="userMapper">
 
-    <!-- 
-        사용자 정보를 Java 객체(UserDto)와 DB 컬럼 간 매핑해주는 resultMap
-        - DB 컬럼명과 UserDto 필드명을 수동으로 매핑함
-     -->
-    <resultMap id="userResultMap" type="com.example.spring.user.UserDto">
-        <result property="userId" column="user_id" />
-        <result property="password" column="password" />
-        <result property="username" column="username" />
-        <result property="phone" column="phone" />
-        <result property="email" column="email" />
-        <result property="role" column="role" />
-        <result property="createdAt" column="created_at" />
-        <result property="updatedAt" column="updated_at" />
-    </resultMap>
-
     <!--
         사용자 등록 쿼리
-        - 회원가입 시 사용자의 정보를 users 테이블에 삽입
-        - 입력 파라미터는 UserDto 객체이며, 필드 값이 각각 매핑됨
+        - 회원 가입 시 사용되는 INSERT 문
+        - parameterType: UserDto 객체를 전달받아 각 필드를 users 테이블에 저장
      -->
     <insert id="create" parameterType="com.example.spring.user.UserDto">
         <![CDATA[
         INSERT INTO users (
-            user_id,      -- 사용자 ID (PK)
+            user_id,      -- 로그인용 사용자 ID
             password,     -- 암호화된 비밀번호
             username,     -- 사용자 이름
-            phone,        -- 전화번호
+            phone,        -- 연락처
             email         -- 이메일
         ) VALUES (
             #{userId},
@@ -41,213 +26,5 @@
         )
         ]]>
     </insert>
-
-    <!--
-        사용자 단건 조회 쿼리
-        - 주어진 조건(userId, username, phone, email)에 따라 사용자 정보 조회
-        - 입력 파라미터는 UserDto이며, 조건은 동적으로 적용됨
-        - WHERE 절은 1=1로 시작하여 조건이 있는 항목만 필터링
-        - 결과는 userResultMap을 사용하여 UserDto로 매핑됨
-     -->
-    <select id="read" resultMap="userResultMap" parameterType="com.example.spring.user.UserDto">
-        <![CDATA[
-        SELECT
-            user_id,
-            password,
-            username,
-            phone,
-            email,
-            role,
-            created_at,
-            updated_at
-        FROM
-            users
-        WHERE 1=1
-        ]]>
-        <if test="userId != null">
-            <![CDATA[
-            AND user_id = #{userId}
-            ]]>
-        </if>
-        <if test="username != null">
-            <![CDATA[
-            AND username = #{username}
-            ]]>
-        </if>
-        <if test="phone != null">
-            <![CDATA[
-            AND phone = #{phone}
-            ]]>
-        </if>
-        <if test="email != null">
-            <![CDATA[
-            AND email = #{email}
-            ]]>
-        </if>
-        <![CDATA[
-        LIMIT 1
-        ]]>
-    </select>
-
-    <!--
-        사용자 정보 수정 쿼리
-        - 전달된 UserDto의 값 중 null이 아닌 항목만 수정 대상에 포함됨
-        - user_id는 PK이며, WHERE 조건으로 사용 (자기 자신을 기준으로 업데이트)
-        - LIMIT 1은 실수로 다수의 행이 수정되는 것을 방지함 (MySQL 기준 권장)
-        - password, username, phone, email 등을 선택적으로 수정할 수 있음
-    -->
-    <update id="update" parameterType="com.example.spring.user.UserDto">
-        <![CDATA[
-        UPDATE users
-        SET user_id = #{userId}
-        ]]>
-        <if test="username != null">
-            <![CDATA[
-            , username = #{username}
-            ]]>
-        </if>
-        <if test="phone != null">
-            <![CDATA[
-            , phone = #{phone}
-            ]]>
-        </if>
-        <if test="email != null">
-            <![CDATA[
-            , email = #{email}
-            ]]>
-        </if>
-        <if test="password != null">
-            <![CDATA[
-            , password = #{password}
-            ]]>
-        </if>
-        <![CDATA[
-        WHERE user_id = #{userId}
-        LIMIT 1
-        ]]>
-    </update>
-
-    <!--
-        사용자 삭제 쿼리
-        - user_id를 기준으로 사용자를 삭제함
-        - parameterType: 삭제할 사용자 정보를 담은 UserDto 객체
-        - LIMIT 1: 안전을 위해 단일 레코드만 삭제하도록 제한 (MySQL에 한함)
-    -->
-    <delete id="delete" parameterType="com.example.spring.user.UserDto">
-        <![CDATA[
-        DELETE FROM users
-        WHERE user_id = #{userId}
-        LIMIT 1
-        ]]>
-    </delete>
-
-    <!-- 사용자 목록 -->
-    <select id="list" resultMap="userResultMap">
-        <![CDATA[
-        SELECT
-            user_id,
-            password,
-            username,
-            phone,
-            email,
-            role,
-            created_at,
-            updated_at
-        FROM
-            users
-        WHERE 1=1
-        ]]>
-
-        <!-- 검색 조건이 있는 경우에만 필터링 조건 적용 -->
-        <if test="searchType != null and searchKeyword != null">
-            <choose>
-                <when test="searchType == 'userId'">
-                    <![CDATA[
-                    AND user_id LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'username'">
-                    <![CDATA[
-                    AND username LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'phone'">
-                    <![CDATA[
-                    AND phone LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'email'">
-                    <![CDATA[
-                    AND email LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'all'">
-                    <![CDATA[
-                    AND (
-                        title LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR user_id LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR username LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR phone LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR email LIKE CONCAT('%', #{searchKeyword}, '%')
-                    )
-                    ]]>
-                </when>
-            </choose>
-        </if>
-        <![CDATA[
-        ORDER BY username DESC
-        LIMIT #{offset}, #{listCountPerPage}
-        ]]>
-    </select>
-
-    <!--
-        전체 사용자 수를 조회하는 쿼리
-        - 검색 조건(searchType, searchKeyword)에 따라 조건부 COUNT(*) 수행
-        - 페이징 처리를 위한 totalCount 계산에 사용됨
-    -->
-    <select id="totalCount" resultType="int">
-        <![CDATA[
-        SELECT COUNT(*)
-        FROM users
-        WHERE 1=1
-        ]]>
-
-        <!-- 검색 조건이 있는 경우에만 필터링 조건 적용 -->
-        <if test="searchType != null and searchKeyword != null">
-            <choose>
-                <when test="searchType == 'userId'">
-                    <![CDATA[
-                    AND user_id LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'username'">
-                    <![CDATA[
-                    AND username LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'phone'">
-                    <![CDATA[
-                    AND phone LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'email'">
-                    <![CDATA[
-                    AND email LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-                <when test="searchType == 'all'">
-                    <![CDATA[
-                    AND (
-                        title LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR user_id LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR username LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR phone LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR email LIKE CONCAT('%', #{searchKeyword}, '%')
-                    )
-                    ]]>
-                </when>
-            </choose>
-        </if>
-    </select>
 
 </mapper>
