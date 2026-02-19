@@ -101,4 +101,16 @@ public class AuthController {
         // 결과 메시지를 전달하고 다시 아이디 찾기 화면으로 리다이렉트
         return "redirect:/auth/find-user-id";
     }
+
+    /**
+     * 비밀번호 초기화 화면 요청 처리 (GET 방식)
+     *
+     * @param request 현재 요청 객체 (세션 확인용)
+     * @return 비밀번호 초기화 폼(auth/resetPassword.jsp) 또는 리다이렉트 경로
+     */
+    @GetMapping("/reset-password")
+    public String resetPasswordGet(HttpServletRequest request) {
+        // 비밀번호 초기화 화면 제공
+        return "auth/resetPassword";
+    }
 }
