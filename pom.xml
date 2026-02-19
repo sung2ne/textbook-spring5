@@ -10,9 +10,8 @@
     <!-- 버전 설정 -->
     <properties>
         <spring.version>5.3.39</spring.version>
-        <spring.security.version>5.8.11</spring.security.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <log4j.version>2.20.0</log4j.version>
+        <log4j.version>2.25.2</log4j.version>
     </properties>
 
     <!-- 의존성 목록 -->
@@ -37,12 +36,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Servlet API -->
@@ -92,95 +85,11 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- 데이터베이스 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>2.7.5</version>
-        </dependency>
-
-        <!-- HikariCP 데이터베이스 커넥션 풀 -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>4.0.3</version>
-        </dependency>
-
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- MyBatis -->
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
-            <version>2.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis</artifactId>
-            <version>3.5.13</version>
-        </dependency>
-
-        <!-- Spring Security -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-
-        <!-- Commons FileUpload -->
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>1.5</version>
-        </dependency>
-
-        <!-- Jackson Core -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.15.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.15.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.15.3</version>
-        </dependency>
-
-        <!-- coolsms -->
-        <dependency>
-            <groupId>net.nurigo</groupId>
-            <artifactId>sdk</artifactId>
-            <version>4.2.7</version>
-        </dependency>
-
-        <!-- email -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
-        </dependency>
     </dependencies>
 
     <!-- 빌드 설정 -->
     <build>
-        <finalName>ROOT</finalName>
+        <finalName>ROOT</finalName>        
         <plugins>
             <!-- Maven 컴파일러 플러그인 -->
             <plugin>

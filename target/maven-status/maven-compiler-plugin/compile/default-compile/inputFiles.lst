@@ -2,6 +2,8 @@
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/libs/Sms.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/HomeController.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/user/UserDao.java
+/Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/comment/CommentDao.java
+/Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/comment/CommentService.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/user/UserController.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/post/PostService.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/authPost/AuthPostController.java
@@ -13,6 +15,8 @@
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/interceptor/AuthInterceptor.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/user/UserDto.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/libs/Email.java
+/Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/comment/CommentDto.java
+/Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/comment/CommentController.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/authPost/AuthPostService.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/user/UserService.java
 /Users/jeongps/dev/textbook/spring5/src/main/java/com/example/spring/authPost/AuthPostDto.java
