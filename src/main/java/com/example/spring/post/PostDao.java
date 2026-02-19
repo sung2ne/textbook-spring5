@@ -11,16 +11,15 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-@Component // 해당 클래스가 Spring의 Bean으로 등록되도록 지정
+@Component
 public class PostDao {
     
-    // 로그 출력을 위한 Logger 객체 생성
     private static final Logger logger = LoggerFactory.getLogger(PostDao.class);
 
-    @Autowired // Spring이 JdbcTemplate 객체를 자동으로 주입
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Autowired // Spring이 SqlSessionTemplate 객체를 자동으로 주입
+    @Autowired
     private SqlSessionTemplate sqlSession;
 
     /**
@@ -33,10 +32,8 @@ public class PostDao {
         List<PostDto> posts = null;
 
         try {
-            // MyBatis의 매퍼 네임스페이스(postMapper)와 id(list)를 지정하여 쿼리 실행
             posts = sqlSession.selectList("postMapper.list");
         } catch (DataAccessException e) {
-            // 데이터 조회 중 오류가 발생한 경우 로그 출력
             logger.error("게시글 목록 오류 : {}", e.getMessage(), e);
         }
 
@@ -44,36 +41,25 @@ public class PostDao {
     }
 
     /**
-     * 게시글을 데이터베이스에 저장하는 메서드
+     * 게시글을 데이터베이스에 저장하는 메서드 (MyBatis 기반)
      * @param post 사용자가 작성한 게시글 데이터
-     * @return 삽입된 게시글 id(성공 시 게시글 id, 실패 시 -1)
+     * @return 삽입된 게시글 id (성공 시 post.getId()에 자동 주입됨, 실패 시 -1)
      */
     public int create(PostDto post) {
-        // 게시글의 제목, 내용, 작성자, 비밀번호만 저장하며, 작성일시는 DB에서 자동 처리
-        String query = "INSERT INTO posts (title, content, username, password) VALUES (?, ?, ?, ?)";
-
-        // 마지막에 저장된 ID를 가져오는 쿼리
-        String idQuery = "SELECT LAST_INSERT_ID()"; 
-
         int result = -1;
 
         try {
-            // 게시글 저장 쿼리 실행
-            jdbcTemplate.update(query,
-                    post.getTitle(),
-                    post.getContent(),
-                    post.getUsername(),
-                    post.getPassword());
+            // MyBatis 매퍼의 postMapper.create 구문 실행
+            // useGeneratedKeys="true"와 keyProperty="id"가 설정되어 있어 post.id에 자동으로 삽입된 ID가 주입됨
+            result = sqlSession.insert("postMapper.create", post);
 
-            // 방금 삽입한 글의 id반환
-            // LAST_INSERT_ID()는 동일한 DB 세션 내에서만 유효하므로 반드시 update() 직후에 호출해야 함
-            result = jdbcTemplate.queryForObject(idQuery, Integer.class);
+            // insert()는 삽입된 행 수를 반환하므로, 성공 시 post.getId()에서 생성된 게시글 ID를 확인 가능
+            return result > 0 ? post.getId() : -1;
+
         } catch (DataAccessException e) {
-            // 예외 발생 시 로그 출력
             logger.error("게시글 등록 오류 : {}", e.getMessage(), e);
+            return -1;
         }
-
-        return result;
     }
 
     /**
@@ -82,16 +68,13 @@ public class PostDao {
      * @return 게시글 정보(PostDto), 조회 실패 시 null 반환
      */
     public PostDto read(int id) {
-        // 게시글 단건 조회 SQL 쿼리
-        String query = "SELECT id, title, content, username, password, created_at, updated_at FROM posts WHERE id= ? LIMIT 1";
+        String query = "SELECT id, title, content, username, password, created_at, updated_at FROM posts WHERE id = ? LIMIT 1";
 
         PostDto post = null;
 
         try {
-            // ID에 해당하는 게시글 조회 후 PostDto 객체로 반환
             post = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(PostDto.class), id);
         } catch (DataAccessException e) {
-            // 예외 발생 시 로그 출력
             logger.error("게시글 조회 오류 (id: {}): {}", id, e.getMessage(), e);
         }
 
@@ -104,7 +87,7 @@ public class PostDao {
      * @return 수정된 행 수 (성공 시 1, 실패 시 -1)
      */
     public int update(PostDto post) {
-        String query = "UPDATE posts SET title = ?, content = ?, username = ?, password = ? WHERE id= ? LIMIT 1";
+        String query = "UPDATE posts SET title = ?, content = ?, username = ?, password = ? WHERE id = ? LIMIT 1";
         int result = -1;
 
         try {
@@ -127,7 +110,7 @@ public class PostDao {
      * @return 삭제된 행 수 (성공 시 1, 실패 시 -1)
      */
     public int delete(int id) {
-        String query = "DELETE FROM posts WHERE id= ? LIMIT 1";
+        String query = "DELETE FROM posts WHERE id = ? LIMIT 1";
         int result = -1;
 
         try {
