@@ -4,6 +4,7 @@ com/example/spring/authPost/AuthPostDao.class
 com/example/spring/user/UserController.class
 com/example/spring/libs/Pagination.class
 com/example/spring/libs/Email$1.class
+com/example/spring/authPost/AuthPostService.class
 com/example/spring/post/PostDao.class
 com/example/spring/user/UserService.class
 com/example/spring/libs/Email.class
