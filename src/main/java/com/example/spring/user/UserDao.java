@@ -22,7 +22,7 @@ public class UserDao {
     /**
      * 사용자 등록
      * - MyBatis 매퍼(userMapper.create)를 호출하여 USERS 테이블에 사용자 정보를 삽입
-     *
+     * 
      * @param user 가입할 사용자 정보(UserDto)
      * @return 삽입 성공 시 1, 실패 시 -1
      */
@@ -74,6 +74,26 @@ public class UserDao {
             result = sqlSession.update("userMapper.update", user);
         } catch (DataAccessException e) {
             logger.error("사용자 수정 오류 : {}", e.getMessage(), e);
+        }
+
+        return result;
+    }
+
+    /**
+     * 사용자 삭제 메서드
+     * - 주어진 사용자 ID를 기반으로 DB에서 사용자 정보를 삭제함
+     * - MyBatis 매퍼의 userMapper.delete 쿼리를 호출
+     *
+     * @param userId 삭제할 사용자 ID
+     * @return 삭제된 행 수 (성공 시 1, 실패 시 -1)
+     */
+    public int delete(String userId) {
+        int result = -1;
+
+        try {
+            result = sqlSession.delete("userMapper.delete", userId);
+        } catch (DataAccessException e) {
+            logger.error("사용자 삭제 오류 : {}", e.getMessage(), e);
         }
 
         return result;
