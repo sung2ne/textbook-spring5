@@ -88,22 +88,20 @@ public class PostDao {
 
     /**
      * 게시글을 수정하는 메서드
+     * MyBatis 매퍼(postMapper.update)를 호출하여 게시글 정보를 DB에 반영함
+     *
      * @param post 수정할 게시글 정보 (id 포함)
-     * @return 수정된 행 수 (성공 시 1, 실패 시 -1)
+     * @return 수정된 행 수 (성공 시 1, 실패 또는 오류 시 -1)
      */
     public int update(PostDto post) {
-        String query = "UPDATE posts SET title = ?, content = ?, username = ?, password = ? WHERE id = ? LIMIT 1";
         int result = -1;
 
         try {
-            result = jdbcTemplate.update(query,
-                    post.getTitle(),
-                    post.getContent(),
-                    post.getUsername(),
-                    post.getPassword(),
-                    post.getId());
+            // postMapper.xml의 <update id="update"> 구문 실행
+            result = sqlSession.update("postMapper.update", post);
         } catch (DataAccessException e) {
-            logger.error("게시글 수정 오류: {}", e.getMessage(), e);
+            // SQL 실행 중 오류 발생 시 로그 출력
+            logger.error("게시글 수정 오류 : {}", e.getMessage(), e);
         }
 
         return result;

@@ -84,4 +84,26 @@
         ]]>
     </select>
 
+    <!--
+        게시글 수정 쿼리
+        - id(PK)를 기준으로 게시글 정보를 수정함
+        - parameterType: 수정할 게시글 정보를 담은 PostDto 객체를 전달받음
+        - LIMIT 1: 실수로 다수의 행이 수정되는 것을 방지 (MySQL에서 권장)
+    -->
+    <update id="update" parameterType="com.example.spring.post.PostDto">
+        <![CDATA[
+        UPDATE
+            posts
+        SET
+            title = #{title},         -- 게시글 제목 수정
+            content = #{content},     -- 게시글 내용 수정
+            username = #{username},   -- 작성자명 수정 (선택적)
+            password = #{password},   -- 비밀번호도 수정 가능
+            updated_at = NOW()        -- 수정 시각 갱신
+        WHERE
+            id = #{id}                -- 수정할 게시글의 고유 id
+        LIMIT 1
+        ]]>
+    </update>
+
 </mapper>
