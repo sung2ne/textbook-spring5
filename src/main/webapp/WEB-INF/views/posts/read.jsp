@@ -11,15 +11,15 @@
     <div class="container">
         <%-- 네비게이션 --%>
         <%@ include file="../base/navbar.jsp" %>
-        <%-- // 네비게이션 --%>
+        <%--// 네비게이션 --%>
 
         <%-- 페이지 제목 --%>
         <%@ include file="../base/title.jsp" %>
-        <%-- // 페이지 제목 --%>
+        <%--// 페이지 제목 --%>
 
         <%-- 메시지 --%>
         <%@ include file="../base/message.jsp" %>
-        <%-- // 메시지 --%>
+        <%--// 메시지 --%>
 
         <%-- 페이지 내용 --%>
         <div class="row">
@@ -29,12 +29,17 @@
                     <div class="card-header">
                         <strong>${post.title}</strong>
                     </div>
-                    <div class="card-body">  
+                    <div class="card-body">
                         <div class="mb-3 text-muted">
                             글쓴이: ${post.username} | 등록일시: <fmt:formatDate value="${post.createdAt}" pattern="yyyy-MM-dd HH:mm"/> | 수정일시: <fmt:formatDate value="${post.updatedAt}" pattern="yyyy-MM-dd HH:mm"/>
                         </div>
+                        <c:if test="${post.fileName != null}">
+                            <div class="mb-3">
+                                첨부파일: <a href="/posts/${post.id}/download" class="btn btn-outline-primary">${post.originalFileName}</a>
+                            </div>
+                        </c:if>
                         <div class="mb-3">
-                            ${fn:replace(post.content, newLine, "<br>")}
+                            ${post.content}
                         </div>
                     </div>
                     <div class="card-footer">
@@ -42,11 +47,11 @@
                         <a href="/posts/${post.id}/update" class="btn btn-warning">수정</a>
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">삭제</button>
                     </div>
-                </div>        
-                <%-- // 게시글 보기 --%>
+                </div>
+                <%--// 게시글 보기 --%>
             </div>
         </div>
-        <%-- // 페이지 내용 --%>
+        <%--// 페이지 내용 --%>
     </div>
 
     <%-- 삭제 모달 --%>
@@ -61,7 +66,7 @@
                         </h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <%-- // modal-header --%>
+                    <%--// modal-header --%>
 
                     <%-- modal-body --%>
                     <div class="modal-body">
@@ -73,14 +78,14 @@
                             <input type="password" id="password" name="password" placeholder="비밀번호" class="form-control" required>
                         </div>
                     </div>
-                    <%-- // modal-body --%>
+                    <%--// modal-body --%>
 
                     <%-- modal-footer --%>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-outline-danger">삭제</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                     </div>
-                    <%-- // modal-footer --%>
+                    <%--// modal-footer --%>
                 </form>
             </div>
         </div>
@@ -89,6 +94,6 @@
 
     <%-- 자바스크립트 --%>
     <%@ include file="../base/script.jsp" %>
-    <%-- // 자바스크립트 --%>
+    <%--// 자바스크립트 --%>
 </body>
 </html>
