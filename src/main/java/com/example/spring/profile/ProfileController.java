@@ -118,4 +118,36 @@ public class ProfileController {
     public String updatePasswordGet() {
         return "profile/updatePassword";
     }
+
+    /**
+     * 비밀번호 수정 요청 처리 (POST 방식)
+     * - 세션에서 로그인된 사용자 ID를 가져와 비밀번호 업데이트 요청 수행
+     * - 수정 성공 여부에 따라 성공/실패 메시지를 전달하고 리디렉트
+     *
+     * @param user 사용자가 입력한 새 비밀번호를 담은 객체
+     * @param request 로그인된 사용자 정보를 가져오기 위한 요청 객체
+     * @param redirectAttributes 결과 메시지를 전달할 객체
+     * @return 수정 성공 시 프로필 페이지로, 실패 시 비밀번호 수정 페이지로 리디렉트
+     */
+    @PostMapping("/update-password")
+    public String updatePasswordPost(UserDto user, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        // 세션에서 로그인된 사용자 ID 가져오기
+        String userId = (String) request.getSession().getAttribute("userId");
+
+        // 비밀번호 설정 대상 사용자 ID 지정
+        user.setUserId(userId);
+
+        // 사용자 정보 수정 (비밀번호만 포함되어도 처리 가능)
+        boolean result = userService.update(user);
+
+        // 수정 성공 시
+        if (result) {
+            redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 수정되었습니다.");
+            return "redirect:/profile";
+        }
+
+        // 수정 실패 시
+        redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 수정에 실패했습니다.");
+        return "redirect:/profile/update-password";
+    }
 }
