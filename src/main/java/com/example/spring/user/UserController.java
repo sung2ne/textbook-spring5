@@ -7,8 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * 사용자(User) 관련 요청을 처리하는 컨트롤러 클래스
@@ -80,5 +82,29 @@ public class UserController {
 
         // 사용자 상세보기 화면 렌더링
         return "user/read";
+    }
+
+    /**
+     * 사용자 삭제 요청 처리 (POST 방식)
+     * - 비밀번호 검증 후 사용자 삭제
+     *
+     * @param userId 조회할 사용자 ID (URL 경로 변수)
+     * @param redirectAttributes 삭제 결과 메시지 전달용 객체
+     * @return 삭제 성공 시 목록 페이지로, 실패 시 상세보기 페이지로 리다이렉트
+     */
+    @PostMapping("/{userId}/delete")
+    public String deletePost(String userId, RedirectAttributes redirectAttributes) {
+        // 사용자 삭제 처리
+        boolean result = userService.delete(userId);
+
+        if (result) {
+            // 삭제 성공: 성공 메시지 전달 후 사용자 목록으로 이동
+            redirectAttributes.addFlashAttribute("successMessage", "사용자가 삭제되었습니다.");
+            return "redirect:/users/";
+        }
+
+        // 삭제 실패: 에러 메시지 전달 후 사용자 상세보기 페이지로 이동
+        redirectAttributes.addFlashAttribute("errorMessage", "사용자 삭제에 실패하였습니다.");
+        return "redirect:/users/" + userId;
     }
 }
