@@ -77,6 +77,11 @@
                     </div>
                 </form>
                 <%--// 댓글 등록 --%>
+
+                <%-- 댓글 목록 --%>
+                <div id="commentsDiv">
+                </div>
+                <%--// 댓글 목록 --%>
             </div>
         </div>
         <%--// 페이지 내용 --%>
@@ -126,6 +131,73 @@
     <%@ include file="../base/script.jsp" %>
     <script>
         $(document).ready(function() {
+            // 날짜 형식 변환
+            function formatDate(timestamp) {
+                const date = new Date(Number(timestamp));
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hour = String(date.getHours()).padStart(2, '0');
+                const minute = String(date.getMinutes()).padStart(2, '0');
+                return year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+            }
+
+            // 줄바꿈 처리 함수
+            function replaceNewLines(text) {
+                if (!text) return '';
+                return text.replace(/\n/g, '<br>');
+            }
+
+            // 댓글 목록 불러오기 함수
+            function getComments() {
+                $.ajax({
+                    url: '/comments',
+                    type: 'GET',
+                    data: {
+                        'authPostId': '${post.id}'
+                    },
+                    success: function(response) {
+                        let comments = response.comments;
+                        let commentsDiv = '';
+                        for (let comment of comments) {
+                            commentsDiv += '<div class="card mb-3" id="card' + comment.id + '">';
+                            commentsDiv += '<div class="card-body">';
+                            commentsDiv += '<div class="mb-3 text-muted">';
+                            commentsDiv += '아이디: ' + comment.userId + ' | 이름: ' + comment.username + ' | 전화번호: ' + comment.phone + ' | 이메일: ' + comment.email;
+                            commentsDiv += '</div>';
+                            commentsDiv += '<div class="mb-3 text-muted">';
+                            commentsDiv += '등록일시: ' + formatDate(comment.createdAt) + ' | 수정일시: ' + formatDate(comment.updatedAt);
+                            commentsDiv += '</div>';
+                            commentsDiv += '<div class="mb-3">';
+                            commentsDiv += replaceNewLines(comment.content);
+                            commentsDiv += '</div>';
+                            commentsDiv += '</div>';
+
+                            // 댓글 수정, 삭제 버튼
+                            if (comment.userId == '${sessionScope.userId}') {
+                                commentsDiv += '<div class="card-footer">';
+                                commentsDiv += '<button type="button" class="btn btn-warning me-1 btn-update-comment" data-id=' + comment.id + '>댓글 수정</button>';
+                                commentsDiv += '<button type="button" class="btn btn-danger btn-delete-comment" data-id=' + comment.id + '>댓글 삭제</button>';
+                                commentsDiv += '</div>';
+                            }
+
+                            commentsDiv += '</div>';
+                        }
+
+                        $('#commentsDiv').empty();
+                        $('#commentsDiv').html(commentsDiv);
+                        $('#createContent').val('');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('댓글 목록 불러오기 중 오류가 발생했습니다. 다시 시도해주세요.');
+                    }
+                });
+            }
+
+            // 댓글 목록 불러오기
+            getComments();
+
             // 댓글 등록 취소
             $('#cancelCreateComment').on('click', function() {
                 $('#createContent').val('');
@@ -164,6 +236,7 @@
                         success: function(response) {
                             if (response.result == 'ok') {
                                 $('#createContent').val('');
+                                getComments();
                                 alert('댓글이 등록되었습니다.');
                             } else {
                                 alert('댓글 등록에 실패했습니다.');
