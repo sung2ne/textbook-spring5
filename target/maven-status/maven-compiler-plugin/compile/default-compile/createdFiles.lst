@@ -3,4 +3,5 @@ com/example/spring/HomeController.class
 com/example/spring/libs/Pagination.class
 com/example/spring/post/PostService.class
 com/example/spring/post/PostDao.class
+com/example/spring/interceptor/AuthInterceptor.class
 com/example/spring/post/PostDto.class
