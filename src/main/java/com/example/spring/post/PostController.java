@@ -72,13 +72,13 @@ public class PostController {
 
     /**
      * 게시글 상세보기 요청 처리 (GET 방식)
-     * @param id 상세 조회할 게시글 ID
+     * @param id 상세 조회할 게시글 id
      * @param model 뷰에 전달할 게시글 데이터를 담는 객체
-     * @return 상세보기 화면 뷰 이름 ("posts/read.jsp")
+     * @return 상세보기 화면 뷰 이름 ("post/read.jsp")
      */
     @RequestMapping(value = "/posts/{id}", method = RequestMethod.GET)
     public String readGet(@PathVariable("id") int id, Model model) {
-        // 서비스 계층을 통해 게시글 ID에 해당하는 게시글 데이터 조회
+        // 서비스 계층을 통해 게시글 id에 해당하는 게시글 데이터 조회
         PostDto post = postService.read(id);
 
         // 조회한 게시글 데이터를 모델에 담아 뷰로 전달
@@ -90,19 +90,37 @@ public class PostController {
 
     /**
      * 게시글 수정 화면 요청 처리 (GET 방식)
-     * @param id 수정할 게시글의 ID (URL 경로에서 추출)
+     * @param id 수정할 게시글의 id
      * @param model 수정할 게시글 데이터를 뷰로 전달하기 위한 모델 객체
-     * @return "post/update" 뷰 이름 (posts/update.jsp)
+     * @return "post/update" 뷰 이름 (예: post/update.jsp)
      */
     @RequestMapping(value = "/posts/{id}/update", method = RequestMethod.GET)
     public String updateGet(@PathVariable("id") int id, Model model) {
-        // 서비스 계층을 통해 수정할 게시글의 기존 데이터 조회
         PostDto post = postService.read(id);
-
-        // 조회한 게시글 데이터를 모델에 담아 뷰로 전달
         model.addAttribute("post", post);
-
-        // 게시글 수정 화면 렌더링
         return "posts/update";
+    }
+
+    /**
+     * 게시글 수정 요청 처리 (POST 방식)
+     * @param id 수정할 게시글 id
+     * @param post 수정된 게시글 정보 (비밀번호 포함)
+     * @param redirectAttributes 결과 메시지 전달용 객체
+     * @return 수정 성공 시 상세 페이지로, 실패 시 수정 페이지로 리다이렉트
+     */
+    @RequestMapping(value = "/posts/{id}/update", method = RequestMethod.POST)
+    public String updatePost(@PathVariable("id") int id, PostDto post, RedirectAttributes redirectAttributes) {
+        // URL 경로에서 받은 id를 post 객체에 설정
+        post.setId(id);
+
+        // 게시글 수정 처리
+        if (postService.update(post)) {
+            redirectAttributes.addFlashAttribute("successMessage", "게시글이 수정되었습니다.");
+            return "redirect:/posts/" + id;
+        }
+
+        // 실패 시 메시지 전달 후 수정 페이지로 이동
+        redirectAttributes.addFlashAttribute("errorMessage", "게시글 수정에 실패했습니다. (비밀번호 확인)");
+        return "redirect:/posts/" + id + "/update";
     }
 }

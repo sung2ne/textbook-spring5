@@ -36,11 +36,39 @@ public class PostService {
 
     /**
      * 특정 게시글을 조회하는 메서드
-     * @param id 조회할 게시글의 ID
+     * @param id 조회할 게시글의 id
      * @return 게시글(PostDto) 객체, 없으면 null
      */
     public PostDto read(int id) {
-        // DAO를 통해 ID에 해당하는 게시글을 조회
+        // DAO를 통해 id에 해당하는 게시글을 조회
         return postDao.read(id);
+    }
+
+    /**
+     * 게시글을 수정하는 메서드
+     * - 존재 여부 확인
+     * - 비밀번호 일치 여부 확인
+     * - 성공 시 업데이트 처리
+     *
+     * @param post 사용자가 수정한 게시글 정보 (id와 비밀번호 포함)
+     * @return 수정 성공 여부 (true: 성공, false: 실패)
+     */
+    public boolean update(PostDto post) {
+        // 기존 게시글 조회
+        PostDto originalPost = postDao.read(post.getId());
+
+        // 게시글이 존재하지 않으면 수정 실패
+        if (originalPost == null) {
+            return false;
+        }
+
+        // 입력된 비밀번호와 기존 게시글의 비밀번호가 일치하지 않으면 수정 실패
+        if (!originalPost.getPassword().equals(post.getPassword())) {
+            return false;
+        }
+
+        // 비밀번호 일치 시 게시글 업데이트 수행
+        int result = postDao.update(post);
+        return result > 0;
     }
 }
