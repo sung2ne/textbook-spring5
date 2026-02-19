@@ -8,6 +8,7 @@
         DB 컬럼명과 Java 객체의 필드명이 다를 경우 명시적으로 대응시켜줌
     -->
     <resultMap id="postResultMap" type="com.example.spring.post.PostDto">
+        <!-- 게시글 관련 정보-->
         <result property="id" column="id" />
         <result property="title" column="title" />
         <result property="content" column="content" />
@@ -15,6 +16,9 @@
         <result property="password" column="password" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
+        <!-- 첨부파일 관련 정보 -->
+        <result property="fileName" column="file_name" />
+        <result property="originalFileName" column="original_file_name" />
     </resultMap>
 
     <!--
@@ -115,6 +119,8 @@
             content,
             username,
             password,
+            file_name,
+            original_file_name,
             created_at,
             updated_at
         FROM
