@@ -197,4 +197,23 @@ public class AuthController {
         redirectAttributes.addFlashAttribute("errorMessage", "아이디 또는 비밀번호가 일치하지 않습니다.");
         return "redirect:/auth/login";
     }
+
+    /**
+     * 로그아웃 요청 처리 (GET 방식)
+     * - 현재 세션이 존재하면 무효화하고 로그인 페이지로 리다이렉트
+     *
+     * @param request HTTP 요청 객체 (세션 접근용)
+     * @return 로그인 페이지로 리다이렉트
+     */
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        // 현재 세션이 존재하면 삭제 (false 옵션: 세션이 없으면 null 반환)
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            session.invalidate(); // 세션 무효화
+        }
+
+        return "redirect:/auth/login";
+    }
 }
