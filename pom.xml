@@ -162,6 +162,13 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.15.3</version>
         </dependency>
+
+        <!-- coolsms -->
+        <dependency>
+            <groupId>net.nurigo</groupId>
+            <artifactId>sdk</artifactId>
+            <version>4.2.7</version>
+        </dependency>
     </dependencies>
 
     <!-- 빌드 설정 -->
