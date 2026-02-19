@@ -1,0 +1,4 @@
+boolean updated = commentService.update(comment);
+
+// 삭제: ID만 필요
+boolean deleted = commentService.delete(comment.getId());

@@ -1,0 +1,20 @@
+$(document).on('click', '.btn-update-comment', function() {
+    let id = $(this).data('id');
+    $('#card' + id).addClass('d-none');
+    $('#commentUpdateForm' + id).removeClass('d-none');
+});
+
+// 삭제: 확인 후 AJAX 요청
+$(document).on('click', '.btn-delete-comment', function() {
+    if (confirm('정말 삭제하시겠습니까?')) {
+        let id = $(this).data('id');
+        $.ajax({
+            url: '/comments/delete',
+            type: 'POST',
+            data: { 'id': id },
+            success: function(response) {
+                getComments();
+            }
+        });
+    }
+});

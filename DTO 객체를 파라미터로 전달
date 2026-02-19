@@ -1,0 +1,8 @@
+public int update(CommentDto comment) {
+    return sqlSession.update("commentMapper.update", comment);
+}
+
+// 삭제: ID만 파라미터로 전달
+public int delete(int id) {
+    return sqlSession.delete("commentMapper.delete", id);
+}

@@ -108,4 +108,18 @@
         ]]>
     </update>
 
+    <!--
+        댓글 삭제 쿼리
+        - ID를 기준으로 댓글 1건을 삭제함
+        - #{id}: 전달받은 댓글 ID 값
+        - LIMIT 1: 실수로 여러 행이 삭제되는 것을 방지하기 위한 안전장치
+    -->
+    <delete id="delete">
+        <![CDATA[
+        DELETE FROM comments
+        WHERE id = #{id}
+        LIMIT 1
+        ]]>
+    </delete>
+
 </mapper>
