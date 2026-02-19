@@ -65,7 +65,21 @@
                         <c:forEach items="${posts}" var="post">
                             <tr>
                                 <td>${post.id}</td>
-                                <td><a href="/auth-posts/${post.id}/">${post.title}</a></td>
+                                <td>
+                                    <c:if test="${post.secret eq 'Y'}">
+                                        <c:choose>
+                                            <c:when test="${post.userId eq sessionScope.userId or 'ADMIN' eq sessionScope.role}">
+                                                <span class="badge text-bg-danger">비밀글</span>&nbsp;<a href="/auth-posts/${post.id}/">${post.title}</a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="text-danger">비밀글 입니다.</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:if>
+                                    <c:if test="${post.secret eq 'N'}">
+                                        <a href="/auth-posts/${post.id}/">${post.title}</a>
+                                    </c:if>
+                                </td>
                                 <td>${post.username}</td>
                                 <td><fmt:formatDate value="${post.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                                 <td><fmt:formatDate value="${post.updatedAt}" pattern="yyyy-MM-dd HH:mm"/></td>
@@ -110,7 +124,7 @@
                     </ul>
                 </nav>
                 <%--// 페이지네이션 --%>
-                
+
             </div>
         </div>
         <%--// 페이지 내용 --%>
