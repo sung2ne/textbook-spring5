@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.spring.user.UserDto;
 import com.example.spring.user.UserService;
@@ -71,5 +73,38 @@ public class ProfileController {
 
         // 프로필 수정 화면 렌더링
         return "profile/updateProfile";
+    }
+
+    /**
+     * 프로필 수정 요청 처리 (POST 방식)
+     * - 세션에서 로그인된 사용자 ID를 가져와 UserDto에 설정
+     * - 입력된 사용자 정보를 기반으로 수정 처리 수행
+     * - 결과에 따라 성공/실패 메시지를 플래시 속성으로 전달하고 리디렉트
+     *
+     * @param user 수정된 사용자 정보 (폼 입력값)
+     * @param request 세션에서 로그인된 사용자 ID를 가져오기 위한 객체
+     * @param redirectAttributes 리다이렉트 시 메시지를 전달하기 위한 객체
+     * @return 수정 성공 시 프로필 페이지로, 실패 시 수정 폼으로 리디렉트
+     */
+    @PostMapping("/update-profile")
+    public String updateProfilePost(UserDto user, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        // 로그인된 사용자 ID 가져오기
+        String userId = (String) request.getSession().getAttribute("userId");
+
+        // UserDto에 세션 사용자 ID 설정
+        user.setUserId(userId);
+
+        // 사용자 정보 수정 처리
+        boolean result = userService.update(user);
+
+        // 수정 성공 시 메시지와 함께 프로필 페이지로 이동
+        if (result) {
+            redirectAttributes.addFlashAttribute("successMessage", "프로필이 수정되었습니다.");
+            return "redirect:/profile";
+        }
+
+        // 수정 실패 시 에러 메시지 전달 후 다시 수정 페이지로 이동
+        redirectAttributes.addFlashAttribute("errorMessage", "프로필 수정에 실패했습니다.");
+        return "redirect:/profile/update-profile";
     }
 }
