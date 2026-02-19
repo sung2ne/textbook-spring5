@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -204,25 +205,83 @@ public class PostController {
 
     /**
      * 게시글 수정 요청 처리 (POST 방식)
-     * @param id 수정할 게시글 ID
-     * @param post 수정된 게시글 정보 (비밀번호 포함)
-     * @param redirectAttributes 결과 메시지 전달용 객체
-     * @return 수정 성공 시 상세 페이지로, 실패 시 수정 페이지로 리다이렉트
+     * - 게시글 ID와 사용자가 입력한 수정 정보(PostDto)를 받아 게시글을 수정
+     * - 첨부파일이 새로 업로드되었거나 삭제 요청이 있으면 기존 파일 삭제
+     * - 새 파일이 있을 경우 저장하고, 파일 정보를 post 객체에 반영
+     * - 비밀번호 검증 실패 또는 수정 실패 시 수정 페이지로 리다이렉트
+     *
+     * @param id 수정할 게시글 ID (경로 변수)
+     * @param post 수정된 게시글 정보 (비밀번호 및 첨부파일 포함)
+     * @param redirectAttributes 리다이렉트 시 사용자 메시지를 전달할 객체
+     * @return 수정 성공 시 상세보기 페이지로, 실패 시 수정 폼으로 리다이렉트
      */
     @PostMapping("/{id}/update")
-    public String updatePost(@PathVariable("id") int id, PostDto post, RedirectAttributes redirectAttributes) {
-        // URL 경로에서 받은 ID를 post 객체에 설정
-        post.setId(id);
+    public String updatePost(
+            @PathVariable("id") int id,
+            PostDto post,
+            RedirectAttributes redirectAttributes) {
 
-        // 게시글 수정 처리
-        if (postService.update(post)) {
-            redirectAttributes.addFlashAttribute("successMessage", "게시글이 수정되었습니다.");
-            return "redirect:/posts/" + id;
+        String uploadPath = uploadPathByOS(); // 운영체제에 따른 업로드 경로 설정
+        post.setId(id); // URL에서 받은 ID를 post 객체에 설정
+
+        try {
+            // 기존 게시글 정보 조회 (첨부파일 정보 확인용)
+            PostDto originalPost = postService.read(id);
+
+            MultipartFile uploadFile = post.getUploadFile();
+
+            // 파일 삭제 요청이 있거나 새 파일이 업로드된 경우 기존 파일 삭제
+            if ((uploadFile != null && !uploadFile.isEmpty()) || post.isDeleteFile()) {
+                if (originalPost.getFileName() != null) {
+                    Path filePath = Paths.get(uploadPath).resolve(originalPost.getFileName());
+                    if (Files.exists(filePath)) {
+                        Files.delete(filePath); // 기존 파일 삭제
+                    }
+                }
+
+                // 삭제 요청이 있는 경우 DTO에서 파일 정보 초기화
+                if (post.isDeleteFile()) {
+                    post.setFileName(null);
+                    post.setOriginalFileName(null);
+                }
+            }
+
+            // 새 파일이 업로드된 경우 저장 및 파일명 설정
+            if (uploadFile != null && !uploadFile.isEmpty()) {
+                String originalFileName = uploadFile.getOriginalFilename();
+                String fileName = UUID.randomUUID().toString() + "_" + originalFileName;
+
+                // 업로드 디렉토리가 없으면 생성
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                // 파일 저장
+                File fileToUpload = new File(uploadPath + File.separator + fileName);
+                uploadFile.transferTo(fileToUpload);
+
+                // 게시글 객체에 파일 정보 저장
+                post.setFileName(fileName);
+                post.setOriginalFileName(originalFileName);
+            }
+
+            // 게시글 수정 처리 (비밀번호 검증 포함)
+            boolean updated = postService.update(post);
+
+            if (updated) {
+                redirectAttributes.addFlashAttribute("successMessage", "게시글이 수정되었습니다.");
+                return "redirect:/posts/" + id;
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "게시글 수정에 실패했습니다. (비밀번호 확인)");
+                return "redirect:/posts/" + id + "/update";
+            }
+
+        } catch (IOException | IllegalStateException e) {
+            // 파일 처리 중 예외 발생 시
+            redirectAttributes.addFlashAttribute("errorMessage", "파일 업로드에 실패했습니다.");
+            return "redirect:/posts/" + id + "/update";
         }
-
-        // 실패 시 메시지 전달 후 수정 페이지로 이동
-        redirectAttributes.addFlashAttribute("errorMessage", "게시글 수정에 실패했습니다. (비밀번호 확인)");
-        return "redirect:/posts/" + id + "/update";
     }
 
     /**

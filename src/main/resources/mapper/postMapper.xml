@@ -133,21 +133,23 @@
 
     <!--
         게시글 수정 쿼리
-        - ID(PK)를 기준으로 게시글 정보를 수정함
-        - parameterType: 수정할 게시글 정보를 담은 PostDto 객체를 전달받음
-        - LIMIT 1: 실수로 다수의 행이 수정되는 것을 방지 (MySQL에서 권장)
+        - 게시글 ID(PK)를 기준으로 TITLE, CONTENT, USERNAME, PASSWORD, 첨부파일 정보 등을 수정함
+        - parameterType: 수정할 게시글 데이터를 담은 PostDto 객체
+        - LIMIT 1: MySQL에서 다수의 행 수정 방지를 위한 안전장치
     -->
     <update id="update" parameterType="com.example.spring.post.PostDto">
         <![CDATA[
-        UPDATE
-            posts
+        UPDATE posts
         SET
-            title = #{title},         -- 게시글 제목 수정
-            content = #{content},     -- 게시글 내용 수정
-            username = #{username},   -- 작성자명 수정 (선택적)
-            password = #{password}    -- 비밀번호도 수정 가능
+            title = #{title},                    -- 게시글 제목
+            content = #{content},                -- 게시글 내용
+            username = #{username},              -- 작성자 이름
+            password = #{password},              -- 비밀번호
+            file_name = #{fileName},             -- 서버에 저장된 첨부파일명
+            original_file_name = #{originalFileName}, -- 업로드된 원본 파일명
+            updated_at = NOW()                   -- 수정 시각 갱신
         WHERE
-            id = #{id}                -- 수정할 게시글의 고유 ID
+            id = #{id}                           -- 수정 대상 게시글 ID
         LIMIT 1
         ]]>
     </update>
