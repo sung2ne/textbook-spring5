@@ -3,6 +3,7 @@ package com.example.spring.post;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,6 +16,9 @@ public class PostService {
     @Autowired // PostDao 객체를 자동으로 주입받음
     PostDao postDao;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     /**
      * 비밀번호 검증 메서드
      * @param post 사용자가 입력한 게시글 정보(ID, 비밀번호 포함)
@@ -22,7 +26,12 @@ public class PostService {
      */
     private boolean verifyPassword(PostDto post) {
         PostDto originalPost = postDao.read(post.getId());
-        return originalPost != null && originalPost.getPassword().equals(post.getPassword());
+
+        // 게시글 없음
+        if (originalPost == null) return false;
+
+        // matches(사용자입력비밀번호, DB해시비밀번호)
+        return passwordEncoder.matches(post.getPassword(), originalPost.getPassword());
     }
 
     /**
@@ -39,6 +48,11 @@ public class PostService {
      * @return 등록한 게시글 ID
      */
     public int create(PostDto post) {
+        // 비밀번호 암호화
+        String password = passwordEncoder.encode(post.getPassword());
+        post.setPassword(password);
+
+        // DAO를 호출하여 게시글을 DB에 저장하고 결과를 반환
         int result = postDao.create(post);
         return result;
     }
@@ -63,6 +77,10 @@ public class PostService {
         if (!verifyPassword(post)) {
             return false;
         }
+
+        // 비밀번호 암호화
+        String password = passwordEncoder.encode(post.getPassword());
+        post.setPassword(password);
 
         int result = postDao.update(post);
         return result > 0;
