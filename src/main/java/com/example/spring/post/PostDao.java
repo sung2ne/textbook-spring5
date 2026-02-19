@@ -64,4 +64,26 @@ public class PostDao {
 
         return result;
     }
+
+    /**
+     * 게시글 ID를 기준으로 게시글을 조회하는 메서드
+     * @param id 조회할 게시글의 ID
+     * @return 게시글 정보(PostDto), 조회 실패 시 null 반환
+     */
+    public PostDto read(int id) {
+        // 게시글 단건 조회 SQL 쿼리
+        String query = "select id, title, content, username, password, created_at, updated_at from posts where id = ?";
+
+        PostDto post = null;
+
+        try {
+            // ID에 해당하는 게시글 조회 후 PostDto 객체로 반환
+            post = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(PostDto.class), id);
+        } catch (DataAccessException e) {
+            // 예외 발생 시 로그 출력
+            logger.error("게시글 조회 오류 (ID: {}): {}", id, e.getMessage(), e);
+        }
+
+        return post;
+    }
 }

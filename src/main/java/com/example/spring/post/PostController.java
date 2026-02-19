@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -39,7 +40,7 @@ public class PostController {
     /**
      * 게시글 등록 화면 요청 처리 (GET 방식)
      * 사용자가 글을 작성할 수 있는 입력 폼 화면을 보여줌
-     * @return "post/create" 뷰 이름 (posts/create.jsp)
+     * @return "posts/create" 뷰 이름 (posts/create.jsp)
      */
     @RequestMapping(value = "/posts/create", method = RequestMethod.GET)
     public String createGet() {
@@ -67,5 +68,23 @@ public class PostController {
         // 등록 실패 시 에러 메시지를 플래시 속성으로 전달하고 글쓰기 화면으로 리다이렉트
         redirectAttributes.addFlashAttribute("errorMessage", "게시글 등록에 실패했습니다.");
         return "redirect:/posts/create";
+    }
+
+    /**
+     * 게시글 상세보기 요청 처리 (GET 방식)
+     * @param id 상세 조회할 게시글 ID
+     * @param model 뷰에 전달할 게시글 데이터를 담는 객체
+     * @return 상세보기 화면 뷰 이름 ("posts/read.jsp")
+     */
+    @RequestMapping(value = "/posts/{id}", method = RequestMethod.GET)
+    public String readGet(@PathVariable("id") int id, Model model) {
+        // 서비스 계층을 통해 게시글 ID에 해당하는 게시글 데이터 조회
+        PostDto post = postService.read(id);
+
+        // 조회한 게시글 데이터를 모델에 담아 뷰로 전달
+        model.addAttribute("post", post);
+
+        // 게시글 상세보기 화면 렌더링
+        return "posts/read";
     }
 }
