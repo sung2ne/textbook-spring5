@@ -97,7 +97,6 @@
             // TinyMCE 초기화
             tinymce.init({
                 selector: '#content',
-                language: 'ko_KR',
                 // TinyMCE 필수 입력 설정
                 setup: function(editor) {
                     editor.on('change', function() {
