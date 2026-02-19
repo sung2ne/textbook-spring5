@@ -5,17 +5,32 @@
 <mapper namespace="userMapper">
 
     <!--
+        사용자 정보를 Java 객체(UserDto)와 DB 컬럼 간 매핑해주는 resultMap
+        - DB 컬럼명과 UserDto 필드명을 수동으로 매핑함
+     -->
+    <resultMap id="userResultMap" type="com.example.spring.user.UserDto">
+        <result property="userId" column="user_id" />
+        <result property="password" column="password" />
+        <result property="username" column="username" />
+        <result property="phone" column="phone" />
+        <result property="email" column="email" />
+        <result property="role" column="role" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <!--
         사용자 등록 쿼리
-        - 회원 가입 시 사용되는 INSERT 문
-        - parameterType: UserDto 객체를 전달받아 각 필드를 users 테이블에 저장
+        - 회원가입 시 사용자의 정보를 users 테이블에 삽입
+        - 입력 파라미터는 UserDto 객체이며, 필드 값이 각각 매핑됨
      -->
     <insert id="create" parameterType="com.example.spring.user.UserDto">
         <![CDATA[
         INSERT INTO users (
-            user_id,      -- 로그인용 사용자 ID
+            user_id,      -- 사용자 ID (PK)
             password,     -- 암호화된 비밀번호
             username,     -- 사용자 이름
-            phone,        -- 연락처
+            phone,        -- 전화번호
             email         -- 이메일
         ) VALUES (
             #{userId},
@@ -26,5 +41,52 @@
         )
         ]]>
     </insert>
+
+    <!--
+        사용자 단건 조회 쿼리
+        - 주어진 조건(userId, username, phone, email)에 따라 사용자 정보 조회
+        - 입력 파라미터는 UserDto이며, 조건은 동적으로 적용됨
+        - WHERE 절은 1=1로 시작하여 조건이 있는 항목만 필터링
+        - 결과는 userResultMap을 사용하여 UserDto로 매핑됨
+     -->
+    <select id="read" resultMap="userResultMap" parameterType="com.example.spring.user.UserDto">
+        <![CDATA[
+        SELECT
+            user_id,
+            password,
+            username,
+            phone,
+            email,
+            role,
+            created_at,
+            updated_at
+        FROM
+            users
+        WHERE 1=1
+        ]]>
+        <if test="userId != null">
+            <![CDATA[
+            AND user_id = #{userId}
+            ]]>
+        </if>
+        <if test="username != null">
+            <![CDATA[
+            AND username = #{username}
+            ]]>
+        </if>
+        <if test="phone != null">
+            <![CDATA[
+            AND phone = #{phone}
+            ]]>
+        </if>
+        <if test="email != null">
+            <![CDATA[
+            AND email = #{email}
+            ]]>
+        </if>
+        <![CDATA[
+        LIMIT 1
+        ]]>
+    </select>
 
 </mapper>

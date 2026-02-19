@@ -33,4 +33,16 @@ public class UserService {
         int result = userDao.create(user);
         return result > 0;
     }
+
+    /**
+     * 사용자 단건 조회
+     * - userId, username, phone, email 등의 조건을 담은 UserDto를 기준으로 사용자 정보를 조회함
+     * - UserDao.read()를 호출하여 DB에서 사용자 1명을 조회
+     *
+     * @param userVo 조회 조건이 담긴 UserDto 객체
+     * @return 사용자 정보(UserDto), 없으면 null 반환
+     */
+    public UserDto read(UserDto userVo) {
+        return userDao.read(userVo);
+    }
 }

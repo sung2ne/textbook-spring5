@@ -37,4 +37,25 @@ public class UserDao {
 
         return result;
     }
+
+    /**
+     * 사용자 단건 조회
+     * - 주어진 조건(userId, username, phone, email 중 일부 또는 전부)에 해당하는 사용자 1명 조회
+     * - userMapper.xml의 <select id="read"> 쿼리를 실행함
+     *
+     * @param user 조회 조건이 담긴 UserDto 객체
+     * @return 조회된 사용자 정보(UserDto), 없을 경우 null 반환
+     */
+    public UserDto read(UserDto user) {
+        UserDto result = null;
+
+        try {
+            // MyBatis 매퍼 호출 (조건은 userDto 객체에 포함된 필드 기준으로 동적 적용됨)
+            result = sqlSession.selectOne("userMapper.read", user);
+        } catch (Exception e) {
+            logger.error("사용자 조회 오류 : {}", e.getMessage(), e);
+        }
+
+        return result;
+    }
 }
