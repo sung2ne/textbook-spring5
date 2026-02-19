@@ -44,8 +44,7 @@
         - useGeneratedKeys="true": DB에서 생성된 PK 값을 자동으로 가져옴
         - keyProperty="id": 생성된 ID를 PostDto의 id 필드에 자동 저장
     -->
-    <insert id="create" parameterType="com.example.spring.post.PostDto" useGeneratedKeys="true"
-        keyProperty="id">
+    <insert id="create" parameterType="com.example.spring.post.PostDto" useGeneratedKeys="true" keyProperty="id">
         <![CDATA[
         INSERT INTO posts (
             title, 
@@ -105,5 +104,19 @@
         LIMIT 1
         ]]>
     </update>
+
+    <!-- 
+        게시글 삭제 쿼리
+        - ID를 기준으로 게시글 1건을 삭제함
+        - #{id}: 전달받은 게시글 id 값
+        - LIMIT 1: 실수로 여러 행이 삭제되는 것을 방지하기 위한 안전장치 (MySQL에서 유효)
+    -->
+    <delete id="delete">
+        <![CDATA[
+        DELETE FROM posts
+        WHERE id = #{id}
+        LIMIT 1
+        ]]>
+    </delete>
 
 </mapper>

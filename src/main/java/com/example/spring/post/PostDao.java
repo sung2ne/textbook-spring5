@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component // 해당 클래스가 Spring의 Bean으로 등록되도록 지정
@@ -16,9 +14,6 @@ public class PostDao {
     
     // 로그 출력을 위한 Logger 객체 생성
     private static final Logger logger = LoggerFactory.getLogger(PostDao.class);
-
-    @Autowired // Spring이 JdbcTemplate 객체를 자동으로 주입
-    JdbcTemplate jdbcTemplate;
 
     @Autowired // Spring이 SqlSessionTemplate 객체를 자동으로 주입
     private SqlSessionTemplate sqlSession;
@@ -109,17 +104,20 @@ public class PostDao {
 
     /**
      * 게시글을 삭제하는 메서드
+     * MyBatis 매퍼(postMapper.delete)를 호출하여 ID에 해당하는 게시글을 삭제함
+     *
      * @param id 삭제할 게시글의 id
-     * @return 삭제된 행 수 (성공 시 1, 실패 시 -1)
+     * @return 삭제된 행 수 (성공 시 1, 실패 또는 예외 시 -1)
      */
     public int delete(int id) {
-        String query = "DELETE FROM posts WHERE id = ? LIMIT 1";
         int result = -1;
 
         try {
-            result = jdbcTemplate.update(query, id);
+            // postMapper.xml의 <delete id="delete"> 구문 실행
+            result = sqlSession.delete("postMapper.delete", id);
         } catch (DataAccessException e) {
-            logger.error("게시글 삭제 오류: {}", e.getMessage(), e);
+            // 예외 발생 시 로그 출력
+            logger.error("게시글 삭제 오류 : {}", e.getMessage(), e);
         }
 
         return result;
