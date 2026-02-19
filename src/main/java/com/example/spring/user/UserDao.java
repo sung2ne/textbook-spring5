@@ -58,4 +58,24 @@ public class UserDao {
 
         return result;
     }
+
+    /**
+     * 사용자 정보 수정
+     * - 전달받은 UserDto의 필드 중 null이 아닌 값만 DB에 반영
+     * - userMapper.xml의 <update id="update"> 쿼리를 호출
+     *
+     * @param user 수정할 사용자 정보가 담긴 UserDto 객체
+     * @return 수정된 행 수 (성공 시 1, 실패 시 0 또는 -1)
+     */
+    public int update(UserDto user) {
+        int result = -1;
+
+        try {
+            result = sqlSession.update("userMapper.update", user);
+        } catch (DataAccessException e) {
+            logger.error("사용자 수정 오류 : {}", e.getMessage(), e);
+        }
+
+        return result;
+    }
 }

@@ -45,4 +45,26 @@ public class UserService {
     public UserDto read(UserDto userVo) {
         return userDao.read(userVo);
     }
+
+    /**
+     * 사용자 정보 수정
+     * - 전달된 정보 중 비밀번호가 비어있지 않으면 암호화하여 반영
+     * - 그 외 항목(username, phone, email)은 그대로 수정
+     *
+     * @param user 수정할 사용자 정보(UserDto)
+     * @return 수정 성공 여부 (true: 성공, false: 실패)
+     */
+    public boolean update(UserDto user) {
+        // 비밀번호가 비어 있지 않은 경우에만 암호화 처리
+        if (!user.getPassword().isEmpty()) {
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+            user.setPassword(encodedPassword);
+        }
+
+        // DAO를 통해 DB에 사용자 정보 수정 요청
+        int result = userDao.update(user);
+
+        // 수정된 행이 1건 이상이면 성공
+        return result > 0;
+    }
 }
