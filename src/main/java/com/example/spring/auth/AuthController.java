@@ -137,6 +137,7 @@ public class AuthController {
      * 비밀번호 초기화 요청 처리 (POST 방식)
      * - 사용자 정보를 기반으로 사용자 존재 여부 확인
      * - 존재하는 경우 임시 비밀번호(6자리 숫자)로 비밀번호를 재설정하고 암호화 후 저장
+     * - 전화번호로 조회 시 임시 비밀번호를 SMS로 전송
      * - 초기화 결과에 따라 성공/실패 메시지를 FlashAttribute로 전달
      *
      * @param user 사용자 조회를 위한 정보 (이름 + 전화번호 or 이메일)
@@ -159,6 +160,12 @@ public class AuthController {
             boolean result = userService.update(existsUser);
 
             if (result) {
+                // 전화번호가 입력된 경우 SMS로 임시 비밀번호 전송
+                if (user.getPhone() != null) {
+                    Sms coolSMS = new Sms();
+                    coolSMS.sendCoolsms("초기화된 비밀번호는 " + newPassword + " 입니다.", user.getPhone());
+                }
+
                 redirectAttributes.addFlashAttribute("successMessage", "임시 비밀번호는 " + newPassword + " 입니다.");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 초기화에 실패했습니다.");
