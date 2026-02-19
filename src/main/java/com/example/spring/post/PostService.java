@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 
 /**
  * 게시글 관련 비즈니스 로직을 처리하는 서비스 클래스
- * Controller와 DAO 사이에서 중간 역할을 수행
+ * 컨트롤러와 DAO 사이에서 중간 역할을 수행
  */
-@Service  // Spring이 이 클래스를 서비스 컴포넌트로 인식하여 Bean으로 등록
+@Service // Spring이 이 클래스를 서비스 컴포넌트로 인식하여 Bean으로 등록
 public class PostService {
 
-    @Autowired  // PostDao 객체를 자동으로 주입받음
+    @Autowired // PostDao 객체를 자동으로 주입받음
     PostDao postDao;
 
     /**
@@ -20,6 +20,17 @@ public class PostService {
      * @return 게시글 리스트 (List<PostDto>)
      */
     public List<PostDto> list() {
-        return postDao.list();  // DAO를 통해 DB에서 게시글 목록을 가져옴
+        return postDao.list(); // DAO를 통해 DB에서 게시글 목록을 가져옴
+    }
+
+    /**
+     * 게시글을 등록하는 메서드
+     * @param post 사용자가 작성한 게시글 정보
+     * @return 등록 성공 여부 (true: 성공, false: 실패)
+     */
+    public boolean create(PostDto post) {
+        // DAO를 호출하여 게시글을 DB에 저장하고 결과를 반환
+        int result = postDao.create(post);
+        return result > 0; // 1개 이상 행이 삽입되면 성공으로 판단
     }
 }
