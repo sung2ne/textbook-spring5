@@ -52,20 +52,17 @@ public class PostController {
      * 게시글 등록 요청 처리 (POST 방식)
      * @param post 사용자가 작성한 게시글 정보(PostDto)
      * @param redirectAttributes 리다이렉트 시 전달할 메시지를 담는 객체
-     * @return 등록 성공 시 목록 페이지로 리다이렉트, 실패 시 글쓰기 화면으로 이동
+     * @return 등록 성공 시 글 보기로 리다이렉트, 실패 시 글쓰기 화면으로 이동
      */
     @RequestMapping(value = "/posts/create", method = RequestMethod.POST)
     public String createPost(PostDto post, RedirectAttributes redirectAttributes) {
-        // 서비스 계층을 통해 게시글 등록 처리
-        boolean created = postService.create(post);
+        int createdId = postService.create(post);
 
-        if (created) {
-            // 등록 성공 시 메시지를 플래시 속성으로 전달하고 목록 페이지로 리다이렉트
+        if (createdId > 0) {
             redirectAttributes.addFlashAttribute("successMessage", "게시글이 등록되었습니다.");
-            return "redirect:/posts";
+            return "redirect:/posts/" + createdId;
         }
 
-        // 등록 실패 시 에러 메시지를 플래시 속성으로 전달하고 글쓰기 화면으로 리다이렉트
         redirectAttributes.addFlashAttribute("errorMessage", "게시글 등록에 실패했습니다.");
         return "redirect:/posts/create";
     }
@@ -126,26 +123,17 @@ public class PostController {
 
     /**
      * 게시글 삭제 요청 처리 (POST 방식)
-     * @param id 삭제할 게시글 ID
-     * @param post 비밀번호를 담은 PostDto 객체
-     * @param redirectAttributes 결과 메시지 전달용 객체
-     * @return 삭제 성공 시 목록 페이지로, 실패 시 상세 페이지로 리다이렉트
      */
     @RequestMapping(value = "/posts/{id}/delete", method = RequestMethod.POST)
     public String deletePost(@PathVariable("id") int id, PostDto post, RedirectAttributes redirectAttributes) {
-        // URL 경로에서 받은 ID를 post 객체에 설정
         post.setId(id);
-
-        // 게시글 삭제 처리
         boolean deleted = postService.delete(post);
 
         if (deleted) {
-            // 삭제 성공 시 목록 페이지로 리다이렉트
             redirectAttributes.addFlashAttribute("successMessage", "게시글이 삭제되었습니다.");
             return "redirect:/posts";
         }
 
-        // 삭제 실패 시 상세 페이지로 리다이렉트
         redirectAttributes.addFlashAttribute("errorMessage", "게시글 삭제에 실패했습니다. (비밀번호 확인)");
         return "redirect:/posts/" + id;
     }

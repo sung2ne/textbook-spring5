@@ -24,7 +24,7 @@ public class PostDao {
      * @return 게시글(PostDto) 리스트
      */
     public List<PostDto> list() {
-        // 게시글을 ID 내림차순으로 정렬하여 전체 조회하는 SQL 쿼리
+        // 게시글을 id 내림차순으로 정렬하여 전체 조회하는 SQL 쿼리
         String query = "select id, title, content, username, password, created_at, updated_at from posts order by id desc";
         
         List<PostDto> posts = null;
@@ -43,22 +43,23 @@ public class PostDao {
     /**
      * 게시글을 데이터베이스에 저장하는 메서드
      * @param post 사용자가 작성한 게시글 데이터
-     * @return 삽입된 행 수 (성공 시 1, 실패 시 -1)
+     * @return 삽입된 게시글 ID(성공 시 게시글 ID, 실패 시 -1)
      */
     public int create(PostDto post) {
-        // 게시글의 제목, 내용, 작성자, 비밀번호만 저장하며, 작성일시는 DB에서 자동 처리
         String query = "insert into posts (title, content, username, password) values (?, ?, ?, ?)";
+        String idQuery = "select last_insert_id()";
+
         int result = -1;
 
         try {
-            // 쿼리 실행 후 삽입 결과 행 수 반환
-            result = jdbcTemplate.update(query,
+            jdbcTemplate.update(query,
                     post.getTitle(),
                     post.getContent(),
                     post.getUsername(),
                     post.getPassword());
+
+            result = jdbcTemplate.queryForObject(idQuery, Integer.class);
         } catch (DataAccessException e) {
-            // 예외 발생 시 로그 출력
             logger.error("게시글 등록 오류 : {}", e.getMessage(), e);
         }
 
@@ -77,7 +78,7 @@ public class PostDao {
         PostDto post = null;
 
         try {
-            // ID에 해당하는 게시글 조회 후 PostDto 객체로 반환
+            // id에 해당하는 게시글 조회 후 PostDto 객체로 반환
             post = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(PostDto.class), id);
         } catch (DataAccessException e) {
             // 예외 발생 시 로그 출력
@@ -93,7 +94,7 @@ public class PostDao {
      * @return 수정된 행 수 (성공 시 1, 실패 시 -1)
      */
     public int update(PostDto post) {
-        String query = "update posts set title = ?, content = ?, username = ?, password = ?, updated_at = NOW() where id = ?";
+        String query = "update posts set title = ?, content = ?, username = ?, password = ? where id = ? limit 1";
         int result = -1;
 
         try {
@@ -116,7 +117,7 @@ public class PostDao {
      * @return 삭제된 행 수 (성공 시 1, 실패 시 -1)
      */
     public int delete(int id) {
-        String query = "delete from posts where id = ?";
+        String query = "delete from posts where id = ? limit 1";
         int result = -1;
 
         try {
