@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="userMapper">
+
+    <!--
+        사용자 등록 쿼리
+        - 회원 가입 시 사용되는 INSERT 문
+        - parameterType: UserDto 객체를 전달받아 각 필드를 users 테이블에 저장
+     -->
+    <insert id="create" parameterType="com.example.spring.user.UserDto">
+        <![CDATA[
+        INSERT INTO users (
+            user_id,      -- 로그인용 사용자 ID
+            password,     -- 암호화된 비밀번호
+            username,     -- 사용자 이름
+            phone,        -- 연락처
+            email         -- 이메일
+        ) VALUES (
+            #{userId},
+            #{password},
+            #{username},
+            #{phone},
+            #{email}
+        )
+        ]]>
+    </insert>
+
+</mapper>
