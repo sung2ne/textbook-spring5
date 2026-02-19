@@ -27,6 +27,9 @@
                 <%-- 게시글 보기 --%>
                 <div class="card mb-3">
                     <div class="card-header">
+                        <c:if test="${post.secret eq 'Y'}">
+                            <span class="badge text-bg-danger">비밀글</span>&nbsp;
+                        </c:if>
                         <strong>${post.title}</strong>
                     </div>
                     <div class="card-body">
