@@ -61,4 +61,16 @@ public class AuthController {
         redirectAttributes.addFlashAttribute("errorMessage", "회원 가입에 실패했습니다.");
         return "redirect:/auth/register";
     }
+
+    /**
+     * 아이디 찾기 화면 요청 처리 (GET 방식)
+     *
+     * @param request 현재 요청 객체 (세션 확인용)
+     * @return 아이디 찾기 화면(auth/findUserId.jsp)
+     */
+    @GetMapping("/find-user-id")
+    public String findUserIdGet(HttpServletRequest request) {
+        // 아이디 찾기 화면으로 이동
+        return "auth/findUserId";
+    }
 }
