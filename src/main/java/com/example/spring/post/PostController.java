@@ -40,7 +40,7 @@ public class PostController {
     /**
      * 게시글 등록 화면 요청 처리 (GET 방식)
      * 사용자가 글을 작성할 수 있는 입력 폼 화면을 보여줌
-     * @return "posts/create" 뷰 이름 (posts/create.jsp)
+     * @return "post/create" 뷰 이름 (예: post/create.jsp)
      */
     @RequestMapping(value = "/posts/create", method = RequestMethod.GET)
     public String createGet() {
@@ -86,5 +86,23 @@ public class PostController {
 
         // 게시글 상세보기 화면 렌더링
         return "posts/read";
+    }
+
+    /**
+     * 게시글 수정 화면 요청 처리 (GET 방식)
+     * @param id 수정할 게시글의 ID (URL 경로에서 추출)
+     * @param model 수정할 게시글 데이터를 뷰로 전달하기 위한 모델 객체
+     * @return "post/update" 뷰 이름 (posts/update.jsp)
+     */
+    @RequestMapping(value = "/posts/{id}/update", method = RequestMethod.GET)
+    public String updateGet(@PathVariable("id") int id, Model model) {
+        // 서비스 계층을 통해 수정할 게시글의 기존 데이터 조회
+        PostDto post = postService.read(id);
+
+        // 조회한 게시글 데이터를 모델에 담아 뷰로 전달
+        model.addAttribute("post", post);
+
+        // 게시글 수정 화면 렌더링
+        return "posts/update";
     }
 }
