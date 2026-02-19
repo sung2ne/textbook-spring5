@@ -12,3 +12,4 @@ com/example/spring/post/PostService.class
 com/example/spring/user/UserDao.class
 com/example/spring/libs/Sms.class
 com/example/spring/user/UserDto.class
+com/example/spring/profile/ProfileController.class
