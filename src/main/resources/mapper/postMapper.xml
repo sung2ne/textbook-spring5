@@ -3,12 +3,11 @@
 
 <mapper namespace="postMapper">
 
-    <!--
+    <!-- 
         게시글 정보를 Java 객체(PostDto)로 매핑하기 위한 설정
         DB 컬럼명과 Java 객체의 필드명이 다를 경우 명시적으로 대응시켜줌
     -->
     <resultMap id="postResultMap" type="com.example.spring.post.PostDto">
-        <!-- 게시글 관련 정보-->
         <result property="id" column="id" />
         <result property="title" column="title" />
         <result property="content" column="content" />
@@ -16,15 +15,12 @@
         <result property="password" column="password" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
-        <!-- 첨부파일 관련 정보 -->
-        <result property="fileName" column="file_name" />
-        <result property="originalFileName" column="original_file_name" />
     </resultMap>
 
     <!--
         게시글 목록 조회
         - resultMap="postResultMap" 을 통해 각 컬럼을 PostDto에 매핑
-        - ID 기준으로 내림차순 정렬하여 최신 글이 위로 오도록 설정
+        - id 기준으로 내림차순 정렬하여 최신 글이 위로 오도록 설정
     -->
     <select id="list" resultMap="postResultMap">
         <![CDATA[
@@ -38,184 +34,9 @@
             updated_at
         FROM
             posts
-        WHERE 1=1
+        ORDER BY
+            id DESC
         ]]>
-        <if test="searchType != null and searchKeyword != null">
-            <choose>
-                <!-- 제목 검색 -->
-                <when test="searchType == 'title'">
-                    <![CDATA[
-                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-
-                <!-- 내용 검색 -->
-                <when test="searchType == 'content'">
-                    <![CDATA[
-                    AND content LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-
-                <!-- 작성자 검색 -->
-                <when test="searchType == 'username'">
-                    <![CDATA[
-                    AND username LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-
-                <!-- 제목, 내용, 작성자 전체 검색 -->
-                <when test="searchType == 'all'">
-                    <![CDATA[
-                    AND (
-                        title LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR content LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR username LIKE CONCAT('%', #{searchKeyword}, '%')
-                    )
-                    ]]>
-                </when>
-            </choose>
-        </if>
-        <![CDATA[
-        ORDER BY id DESC
-        LIMIT #{offset}, #{listCountPerPage}
-        ]]>
-    </select>
-
-    <!--
-        게시글 등록
-        - useGeneratedKeys="true": DB에서 생성된 PK 값을 자동으로 가져옴
-        - keyProperty="id": 생성된 ID를 PostDto의 id 필드에 자동 저장
-    -->
-    <insert id="create" parameterType="com.example.spring.post.PostDto" useGeneratedKeys="true" keyProperty="id">
-        <![CDATA[
-        INSERT INTO posts (
-            title,
-            content,
-            username,
-            password,
-            file_name,
-            original_file_name
-        ) VALUES (
-            #{title},
-            #{content},
-            #{username},
-            #{password},
-            #{fileName},
-            #{originalFileName}
-        )
-        ]]>
-    </insert>
-
-    <!--
-        게시글 단건 조회
-        - ID를 기준으로 조회
-        - LIMIT 1: 1건만 반환
-    -->
-    <select id="read" resultMap="postResultMap">
-        <![CDATA[
-        SELECT
-            id,
-            title,
-            content,
-            username,
-            password,
-            file_name,
-            original_file_name,
-            created_at,
-            updated_at
-        FROM
-            posts
-        WHERE
-            id = #{id}
-        LIMIT 1
-        ]]>
-    </select>
-
-    <!--
-        게시글 수정 쿼리
-        - 게시글 ID(PK)를 기준으로 TITLE, CONTENT, USERNAME, PASSWORD, 첨부파일 정보 등을 수정함
-        - parameterType: 수정할 게시글 데이터를 담은 PostDto 객체
-        - LIMIT 1: MySQL에서 다수의 행 수정 방지를 위한 안전장치
-    -->
-    <update id="update" parameterType="com.example.spring.post.PostDto">
-        <![CDATA[
-        UPDATE posts
-        SET
-            title = #{title},                    -- 게시글 제목
-            content = #{content},                -- 게시글 내용
-            username = #{username},              -- 작성자 이름
-            password = #{password},              -- 비밀번호
-            file_name = #{fileName},             -- 서버에 저장된 첨부파일명
-            original_file_name = #{originalFileName}, -- 업로드된 원본 파일명
-            updated_at = NOW()                   -- 수정 시각 갱신
-        WHERE
-            id = #{id}                           -- 수정 대상 게시글 ID
-        LIMIT 1
-        ]]>
-    </update>
-
-    <!--
-        게시글 삭제 쿼리
-        - ID를 기준으로 게시글 1건을 삭제함
-        - #{id}: 전달받은 게시글 ID 값
-        - LIMIT 1: 실수로 여러 행이 삭제되는 것을 방지하기 위한 안전장치 (MySQL에서 유효)
-    -->
-    <delete id="delete">
-        <![CDATA[
-        DELETE FROM posts
-        WHERE id = #{id}
-        LIMIT 1
-        ]]>
-    </delete>
-
-    <!--
-        전체 게시글 수를 조회하는 쿼리
-        - 검색 조건(searchType, searchKeyword)에 따라 조건부 COUNT(*) 수행
-        - 페이징 처리를 위한 totalCount 계산에 사용됨
-    -->
-    <select id="totalCount" resultType="int">
-        <![CDATA[
-        SELECT COUNT(*)
-        FROM posts
-        WHERE 1=1
-        ]]>
-
-        <!-- 검색 조건이 있는 경우에만 필터링 조건 적용 -->
-        <if test="searchType != null and searchKeyword != null">
-            <choose>
-                <!-- 제목 검색 -->
-                <when test="searchType == 'title'">
-                    <![CDATA[
-                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-
-                <!-- 내용 검색 -->
-                <when test="searchType == 'content'">
-                    <![CDATA[
-                    AND content LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-
-                <!-- 작성자 검색 -->
-                <when test="searchType == 'username'">
-                    <![CDATA[
-                    AND username LIKE CONCAT('%', #{searchKeyword}, '%')
-                    ]]>
-                </when>
-
-                <!-- 제목, 내용, 작성자 전체 검색 -->
-                <when test="searchType == 'all'">
-                    <![CDATA[
-                    AND (
-                        title LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR content LIKE CONCAT('%', #{searchKeyword}, '%')
-                        OR username LIKE CONCAT('%', #{searchKeyword}, '%')
-                    )
-                    ]]>
-                </when>
-            </choose>
-        </if>
     </select>
 
 </mapper>
