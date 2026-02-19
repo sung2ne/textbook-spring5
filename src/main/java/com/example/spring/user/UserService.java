@@ -67,4 +67,17 @@ public class UserService {
         // 수정된 행이 1건 이상이면 성공
         return result > 0;
     }
+
+    /**
+     * 사용자 삭제 서비스 메서드
+     * - 전달받은 사용자 ID를 기준으로 해당 사용자를 DB에서 삭제
+     * - Dao 계층의 delete 메서드를 호출하고 성공 여부를 boolean 값으로 반환
+     *
+     * @param userId 삭제할 사용자 ID
+     * @return 삭제 성공 여부 (true: 성공, false: 실패)
+     */
+    public boolean delete(String userId) {
+        int result = userDao.delete(userId);
+        return result > 0;
+    }
 }

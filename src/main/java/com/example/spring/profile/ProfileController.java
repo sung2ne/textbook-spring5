@@ -56,7 +56,7 @@ public class ProfileController {
      *
      * @param model 사용자 정보를 전달할 모델 객체
      * @param request 세션에서 로그인된 사용자 정보를 가져오기 위한 요청 객체
-     * @return 프로필 수정 화면 뷰 이름 ("profile/updateProfile.jsp")
+     * @return 프로필 수정 화면 뷰 이름 ("auth/updateProfile.jsp")
      */
     @GetMapping("/update-profile")
     public String updateProfileGet(Model model, HttpServletRequest request) {
@@ -112,7 +112,7 @@ public class ProfileController {
      * 비밀번호 수정 화면 요청 처리 (GET 방식)
      * - 로그인된 사용자가 비밀번호를 변경할 수 있는 화면을 보여줌
      *
-     * @return 비밀번호 수정 폼 뷰 이름 ("profile/updatePassword.jsp")
+     * @return 비밀번호 수정 폼 뷰 이름 ("auth/updatePassword.jsp")
      */
     @GetMapping("/update-password")
     public String updatePasswordGet() {
@@ -149,5 +149,23 @@ public class ProfileController {
         // 수정 실패 시
         redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 수정에 실패했습니다.");
         return "redirect:/profile/update-password";
+    }
+
+    // 회원 탈퇴
+    @PostMapping("/delete")
+    public String delete(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        // 사용자 아이디
+        String userId = (String) request.getSession().getAttribute("userId");
+
+        // 사용자 정보 삭제
+        boolean deleted = userService.delete(userId);
+
+        if (deleted) {
+            redirectAttributes.addFlashAttribute("successMessage", "회원 탈퇴가 완료되었습니다.");
+            return ("redirect:/auth/logout");
+        }
+
+        redirectAttributes.addFlashAttribute("errorMessage", "회원 탈퇴에 실패했습니다.");
+        return ("redirect:/auth/profile");
     }
 }
