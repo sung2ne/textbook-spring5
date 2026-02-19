@@ -73,4 +73,32 @@ public class AuthController {
         // 아이디 찾기 화면으로 이동
         return "auth/findUserId";
     }
+
+    /**
+     * 아이디 찾기 요청 처리 (POST 방식)
+     * - 사용자가 입력한 정보(UserDto: 이름, 전화번호/이메일)를 기준으로 사용자 정보 조회
+     * - 조회된 경우 해당 아이디를 FlashAttribute로 전달
+     * - 조회되지 않은 경우 에러 메시지를 전달
+     *
+     * @param user 사용자 입력 정보 (username, phone 또는 email 포함)
+     * @param request 현재 요청 객체
+     * @param redirectAttributes 리다이렉트 시 메시지를 담기 위한 객체
+     * @return 아이디 찾기 결과를 다시 같은 화면으로 리다이렉트
+     */
+    @PostMapping("/find-user-id")
+    public String findUserIdPost(UserDto user, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        // 입력된 정보를 기반으로 사용자 조회
+        UserDto existsUser = userService.read(user);
+
+        if (existsUser != null) {
+            // 사용자 존재: 아이디를 성공 메시지로 전달
+            redirectAttributes.addFlashAttribute("successMessage", "사용자 아이디는 " + existsUser.getUserId() + " 입니다.");
+        } else {
+            // 사용자 없음: 실패 메시지 전달
+            redirectAttributes.addFlashAttribute("errorMessage", "사용자를 찾을 수 없습니다.");
+        }
+
+        // 결과 메시지를 전달하고 다시 아이디 찾기 화면으로 리다이렉트
+        return "redirect:/auth/find-user-id";
+    }
 }
