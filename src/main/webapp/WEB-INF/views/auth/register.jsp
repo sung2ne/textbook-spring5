@@ -171,7 +171,20 @@
                     email: {
                         required: true,
                         email: true,
-                        maxlength: 50
+                        maxlength: 50,
+                        remote: {
+                            url: '/auth/check-email',
+                            type: 'post',
+                            data: {
+                                email: function() {
+                                    return $('#email').val();
+                                },
+                            },
+                            dataFilter: function(response) {
+                                const data = JSON.parse(response);
+                                return !data.exists;
+                            }
+                        }
                     }
                 },
                 messages: {
@@ -201,7 +214,8 @@
                     email: {
                         required: '이메일을 입력하세요.',
                         email: '올바른 이메일 형식이 아닙니다.',
-                        maxlength: '이메일은 최대 50자까지 가능합니다.'
+                        maxlength: '이메일은 최대 50자까지 가능합니다.',
+                        remote: '이미 사용중인 이메일입니다.'
                     }
                 },
                 errorClass: 'is-invalid',

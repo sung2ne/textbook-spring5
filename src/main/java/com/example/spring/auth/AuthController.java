@@ -270,4 +270,28 @@ public class AuthController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
+
+    /**
+     * 사용자 이메일 중복 체크 (POST 방식, AJAX 처리)
+     * - 사용자가 입력한 이메일이 이미 존재하는지 확인
+     * - JSON 형식으로 결과 반환: { "exists": true } 또는 { "exists": false }
+     *
+     * @param user 이메일을 담은 UserDto 객체
+     * @return 이메일 중복 여부를 포함한 JSON 응답
+     */
+    @PostMapping("/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkEmailPost(UserDto user) {
+        // 입력된 이메일 기준으로 사용자 정보 조회
+        UserDto existsUser = userService.read(user);
+
+        // 응답 데이터 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("exists", existsUser != null);
+
+        // JSON 응답 반환
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
 }
