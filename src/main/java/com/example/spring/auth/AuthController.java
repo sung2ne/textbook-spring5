@@ -169,6 +169,11 @@ public class AuthController {
                     Sms coolSMS = new Sms();
                     coolSMS.sendCoolsms("초기화된 비밀번호는 " + newPassword + " 입니다.", user.getPhone());
                 }
+                // 사용자 존재: 비밀번호를 이메일로 전달
+                else if (user.getEmail() != null) {
+                    Email emailService = new Email();
+                    emailService.sendNaverEmail("비밀번호 찾기", "초기화된 비밀번호는 " + newPassword + " 입니다.", user.getEmail());
+                }
 
                 redirectAttributes.addFlashAttribute("successMessage", "임시 비밀번호는 " + newPassword + " 입니다.");
             } else {
