@@ -127,12 +127,6 @@ public class AuthController {
      */
     @PostMapping("/reset-password")
     public String resetPasswordPost(UserDto user, HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        // 세션에 userId가 존재하면 로그인 상태로 판단
-        if (request.getSession().getAttribute("userId") != null) {
-            // 이미 로그인된 사용자는 게시글 목록 페이지로 이동
-            return "redirect:/posts";
-        }
-
         // 사용자 정보 조회
         UserDto existsUser = userService.read(user);
 
@@ -155,5 +149,17 @@ public class AuthController {
         }
 
         return "redirect:/auth/reset-password";
+    }
+
+    /**
+     * 로그인 화면 요청 처리 (GET 방식)
+     *
+     * @param request 현재 요청 객체 (세션 확인용)
+     * @return 로그인 화면 또는 게시글 목록 리다이렉트
+     */
+    @GetMapping("/login")
+    public String login(HttpServletRequest request) {
+        // 사용자에게 로그인 폼 제공
+        return "auth/login";
     }
 }
