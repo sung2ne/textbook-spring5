@@ -2,12 +2,20 @@ package com.example.spring.post;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -232,5 +240,52 @@ public class PostController {
 
         redirectAttributes.addFlashAttribute("errorMessage", "게시글 삭제에 실패했습니다. (비밀번호 확인)");
         return "redirect:/posts/" + id;
+    }
+
+    /**
+     * 게시글 첨부파일 다운로드 요청 처리
+     * - 게시글 ID를 기반으로 첨부된 파일을 서버에서 찾아 클라이언트로 전송
+     * - 파일이 존재하지 않거나 읽을 수 없는 경우 404 응답 반환
+     *
+     * @param id 다운로드할 게시글 ID
+     * @return ResponseEntity<Resource> 형태의 HTTP 응답 (첨부파일 포함)
+     */
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> download(@PathVariable("id") int id) {
+        String uploadPath = uploadPathByOS(); // 운영체제에 따른 업로드 경로 설정
+
+        try {
+            // 게시글 정보 조회
+            PostDto post = postService.read(id);
+
+            // 게시글 또는 첨부파일이 없는 경우 404 반환
+            if (post == null || post.getFileName() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 파일 경로 생성 (업로드 디렉토리 + 저장 파일명)
+            Path filePath = Paths.get(uploadPath).resolve(post.getFileName());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            // 파일이 존재하지 않거나 읽을 수 없는 경우 404 반환
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 다운로드 시 사용될 파일명 (원본 파일명 유지)
+            String fileName = post.getOriginalFileName();
+
+            // 파일명이 한글일 경우 브라우저에 맞게 인코딩 처리
+            String encodedDownloadName = new String(fileName.getBytes("UTF-8"), "ISO-8859-1");
+
+            // 파일 다운로드 응답 생성
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedDownloadName + "\"")
+                    .body(resource);
+
+        } catch (UnsupportedEncodingException | MalformedURLException e) {
+            logger.error("파일 다운로드 오류: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
