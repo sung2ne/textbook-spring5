@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component // 해당 클래스가 Spring의 Bean으로 등록되도록 지정
 public class PostDao {
-    
+
     // 로그 출력을 위한 Logger 객체 생성
     private static final Logger logger = LoggerFactory.getLogger(PostDao.class);
 
@@ -21,26 +21,32 @@ public class PostDao {
     private SqlSessionTemplate sqlSession;
 
     /**
-     * 게시글 목록을 조회하는 메서드 (검색 기능 포함)
-     * 검색 조건이 주어지면 해당 조건(title, content, username)에 따라 필터링된 결과를 반환하고,
-     * 검색 조건이 없으면 전체 게시글을 조회함
+     * 게시글 목록을 조회하는 메서드 (페이징 및 검색 기능 포함)
+     * - 검색 조건이 주어지면 해당 조건(title, content, username 등)에 따라 필터링된 결과를 조회
+     * - 검색 조건이 없으면 전체 게시글을 조회
+     * - 페이징 처리를 위해 offset과 limit(페이지당 게시글 수)도 함께 전달
      *
-     * @param searchType 검색 유형 ("title", "content", "username" 중 하나)
-     * @param searchKeyword 검색어 (빈 문자열 또는 null이면 전체 조회)
-     * @return 게시글(PostDto) 리스트, 조회 실패 시 null 또는 빈 리스트 반환
+     * @param offset 조회 시작 위치 (예: 0부터 시작, LIMIT offset, count 에서 사용)
+     * @param listCountPerPage 한 페이지에 표시할 게시글 수
+     * @param searchType 검색 기준 ("title", "content", "username", "all" 중 하나)
+     * @param searchKeyword 검색어 (null 또는 빈 문자열이면 전체 조회)
+     * @return 게시글 리스트 (List<PostDto>), 실패 시 null 또는 빈 리스트 반환
      */
-    public List<PostDto> list(String searchType, String searchKeyword) {
+    public List<PostDto> list(int offset, int listCountPerPage, String searchType, String searchKeyword) {
+        // 쿼리에 전달할 파라미터 구성
         Map<String, Object> params = new HashMap<>();
+        params.put("offset", offset);
+        params.put("listCountPerPage", listCountPerPage);
         params.put("searchType", searchType);
         params.put("searchKeyword", searchKeyword);
 
         List<PostDto> posts = null;
 
         try {
-            // MyBatis 매퍼(postMapper.xml)의 list 쿼리를 실행하여 게시글 목록을 조회함
+            // MyBatis 매퍼(postMapper.xml)의 list 쿼리 실행
             posts = sqlSession.selectList("postMapper.list", params);
         } catch (DataAccessException e) {
-            // 데이터 조회 중 오류가 발생한 경우 로그 출력
+            // 예외 발생 시 로그 출력
             logger.error("게시글 목록 오류 : {}", e.getMessage(), e);
         }
 
@@ -130,5 +136,25 @@ public class PostDao {
         }
 
         return result;
+    }
+
+    /**
+     * 전체 게시글 수를 조회하는 메서드 (검색 조건 포함)
+     * - 검색 조건이 주어진 경우 해당 조건(title, content, username 등)에 맞는 게시글 수를 반환
+     * - 검색 조건이 없을 경우 전체 게시글 수를 반환
+     * - 페이징 처리를 위한 totalCount 계산에 사용됨
+     *
+     * @param searchType 검색 기준 ("title", "content", "username", "all" 중 하나)
+     * @param searchKeyword 검색어 (null 또는 빈 문자열이면 전체 게시글 수 조회)
+     * @return 조건에 해당하는 게시글 수 (int)
+     */
+    public int totalCount(String searchType, String searchKeyword) {
+        // 검색 조건을 파라미터 맵에 담아 전달
+        Map<String, Object> params = new HashMap<>();
+        params.put("searchType", searchType);
+        params.put("searchKeyword", searchKeyword);
+
+        // MyBatis 매퍼(postMapper.totalCount) 실행 후 게시글 수 반환
+        return sqlSession.selectOne("postMapper.totalCount", params);
     }
 }

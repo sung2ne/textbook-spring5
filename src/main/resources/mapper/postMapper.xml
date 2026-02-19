@@ -3,7 +3,7 @@
 
 <mapper namespace="postMapper">
 
-    <!-- 
+    <!--
         게시글 정보를 Java 객체(PostDto)로 매핑하기 위한 설정
         DB 컬럼명과 Java 객체의 필드명이 다를 경우 명시적으로 대응시켜줌
     -->
@@ -17,7 +17,7 @@
         <result property="updatedAt" column="updated_at" />
     </resultMap>
 
-    <!-- 
+    <!--
         게시글 목록 조회
         - resultMap="postResultMap" 을 통해 각 컬럼을 PostDto에 매핑
         - ID 기준으로 내림차순 정렬하여 최신 글이 위로 오도록 설정
@@ -73,10 +73,11 @@
         </if>
         <![CDATA[
         ORDER BY id DESC
+        LIMIT #{offset}, #{listCountPerPage}
         ]]>
     </select>
 
-    <!-- 
+    <!--
         게시글 등록
         - useGeneratedKeys="true": DB에서 생성된 PK 값을 자동으로 가져옴
         - keyProperty="id": 생성된 ID를 PostDto의 id 필드에 자동 저장
@@ -97,7 +98,7 @@
         ]]>
     </insert>
 
-    <!-- 
+    <!--
         게시글 단건 조회
         - ID를 기준으로 조회
         - LIMIT 1: 1건만 반환
@@ -142,7 +143,7 @@
         ]]>
     </update>
 
-    <!-- 
+    <!--
         게시글 삭제 쿼리
         - ID를 기준으로 게시글 1건을 삭제함
         - #{id}: 전달받은 게시글 ID 값
@@ -155,5 +156,55 @@
         LIMIT 1
         ]]>
     </delete>
+
+    <!--
+        전체 게시글 수를 조회하는 쿼리
+        - 검색 조건(searchType, searchKeyword)에 따라 조건부 COUNT(*) 수행
+        - 페이징 처리를 위한 totalCount 계산에 사용됨
+    -->
+    <select id="totalCount" resultType="int">
+        <![CDATA[
+        SELECT COUNT(*)
+        FROM posts
+        WHERE 1=1
+        ]]>
+
+        <!-- 검색 조건이 있는 경우에만 필터링 조건 적용 -->
+        <if test="searchType != null and searchKeyword != null">
+            <choose>
+                <!-- 제목 검색 -->
+                <when test="searchType == 'title'">
+                    <![CDATA[
+                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+                    ]]>
+                </when>
+
+                <!-- 내용 검색 -->
+                <when test="searchType == 'content'">
+                    <![CDATA[
+                    AND content LIKE CONCAT('%', #{searchKeyword}, '%')
+                    ]]>
+                </when>
+
+                <!-- 작성자 검색 -->
+                <when test="searchType == 'username'">
+                    <![CDATA[
+                    AND username LIKE CONCAT('%', #{searchKeyword}, '%')
+                    ]]>
+                </when>
+
+                <!-- 제목, 내용, 작성자 전체 검색 -->
+                <when test="searchType == 'all'">
+                    <![CDATA[
+                    AND (
+                        title LIKE CONCAT('%', #{searchKeyword}, '%')
+                        OR content LIKE CONCAT('%', #{searchKeyword}, '%')
+                        OR username LIKE CONCAT('%', #{searchKeyword}, '%')
+                    )
+                    ]]>
+                </when>
+            </choose>
+        </if>
+    </select>
 
 </mapper>

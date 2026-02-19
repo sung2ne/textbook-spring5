@@ -72,6 +72,43 @@
                     </tbody>
                 </table>
                 <%--// 게시글 목록 --%>
+
+                <%-- 페이지네이션 --%>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <%-- 이전 페이지 --%>
+                        <c:if test="${pagination.currentPage > 1}">
+                            <li class="page-item">
+                                <a class="page-link" href="/posts?page=1">처음</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="/posts?page=${pagination.currentPage - 1}">이전</a>
+                            </li>
+                        </c:if>
+                        <%--// 이전 페이지 --%>
+
+                        <%-- 페이지 번호 --%>
+                        <c:forEach begin="${pagination.startPage}" end="${pagination.endPage}" var="pageNumber">
+                            <li class="page-item">
+                                <a class="page-link <c:if test='${pageNumber == pagination.currentPage}'>active</c:if>" href="/posts?page=${pageNumber}">${pageNumber}</a>
+                            </li>
+                        </c:forEach>
+                        <%--// 페이지 번호 --%>
+
+                        <%-- 다음 페이지 --%>
+                        <c:if test="${pagination.currentPage < pagination.totalPages}">
+                            <li class="page-item">
+                                <a class="page-link" href="/posts?page=${pagination.currentPage + 1}">다음</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="/posts?page=${pagination.totalPages}">마지막</a>
+                            </li>
+                        </c:if>
+                        <%--// 다음 페이지 --%>
+                    </ul>
+                </nav>
+                <%--// 페이지네이션 --%>
+
             </div>
         </div>
         <%--// 페이지 내용 --%>
