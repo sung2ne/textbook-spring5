@@ -1,7 +1,12 @@
 package com.example.spring.post;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -22,6 +28,32 @@ public class PostController {
 
     @Autowired // PostService 객체를 자동으로 주입
     PostService postService;
+
+    // 로깅을 위한 변수
+    private static final Logger logger = LoggerFactory.getLogger(PostController.class);
+
+    /**
+     * 운영체제에 따라 파일 업로드 경로를 반환하는 메서드
+     * - 로컬 환경마다 업로드 경로가 다를 수 있으므로 OS 구분 처리
+     *
+     * @return 업로드 경로 (운영체제별 절대경로)
+     */
+    public String uploadPathByOS() {
+        String uploadPath = "";
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if (os.contains("win")) {
+            uploadPath = "C:/upload/post";
+        } else if (os.contains("mac")) {
+            uploadPath = "/Users/user/upload/post";
+        } else if (os.contains("nux") || os.contains("nix")) {
+            uploadPath = "/home/user/upload/post";
+        } else {
+            throw new IllegalStateException("Unsupported operating system: " + os);
+        }
+
+        return uploadPath;
+    }
 
     /**
      * 게시글 목록 화면 요청 처리 (GET 방식)
@@ -75,24 +107,60 @@ public class PostController {
 
     /**
      * 게시글 등록 요청 처리 (POST 방식)
-     * @param post 사용자가 작성한 게시글 정보(PostDto)
+     * - 사용자가 입력한 게시글 정보와 첨부파일을 처리하여 등록
+     * - 첨부파일이 존재할 경우 지정된 경로에 저장하고, 게시글 정보에 파일명 설정
+     * - 등록 성공 시 해당 게시글 보기 페이지로 리다이렉트
+     * - 등록 실패 또는 예외 발생 시 글쓰기 페이지로 리다이렉트
+     *
+     * @param post 사용자가 입력한 게시글 정보 (파일 포함)
      * @param redirectAttributes 리다이렉트 시 전달할 메시지를 담는 객체
-     * @return 등록 성공 시 글 보기로 리다이렉트, 실패 시 글쓰기 화면으로 이동
+     * @return 리다이렉트 경로 (성공 시 상세보기, 실패 시 글쓰기)
      */
     @PostMapping("/create")
     public String createPost(PostDto post, RedirectAttributes redirectAttributes) {
-        // 서비스 계층을 통해 게시글 등록 처리
-        int createdId = postService.create(post);
+        String uploadPath = uploadPathByOS(); // 운영체제에 따른 업로드 경로 설정
 
-        if (createdId > 0) {
-            // 등록 성공 시 메시지를 플래시 속성으로 전달하고 등록된 글 보기로 리다이렉트
-            redirectAttributes.addFlashAttribute("successMessage", "게시글이 등록되었습니다.");
-            return "redirect:/posts/" + createdId;
+        try {
+            // 첨부파일 정보 가져오기
+            MultipartFile uploadFile = post.getUploadFile();
+
+            // 첨부파일이 존재하는 경우 처리
+            if (uploadFile != null && !uploadFile.isEmpty()) {
+                String originalFileName = uploadFile.getOriginalFilename();                      // 원본 파일명
+                String fileName = UUID.randomUUID().toString() + "_" + originalFileName;         // 중복 방지를 위한 저장 파일명
+
+                // 업로드 경로에 디렉토리가 없으면 생성
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                // 파일 저장
+                File fileToUpload = new File(uploadPath + File.separator + fileName);
+                uploadFile.transferTo(fileToUpload);
+
+                // 게시글 DTO에 파일 정보 설정
+                post.setFileName(fileName);
+                post.setOriginalFileName(originalFileName);
+            }
+
+            // 게시글 등록 (성공 시 ID 반환)
+            int createdId = postService.create(post);
+
+            if (createdId > 0) {
+                redirectAttributes.addFlashAttribute("successMessage", "게시글이 등록되었습니다.");
+                return "redirect:/posts/" + createdId;
+            }
+
+            // 등록 실패 시
+            redirectAttributes.addFlashAttribute("errorMessage", "게시글 등록에 실패했습니다.");
+            return "redirect:/posts/create";
+
+        } catch (IOException | IllegalStateException e) {
+            logger.error("파일 업로드 오류: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다.");
+            return "redirect:/posts/create";
         }
-
-        // 등록 실패 시 에러 메시지를 플래시 속성으로 전달하고 글쓰기 화면으로 리다이렉트
-        redirectAttributes.addFlashAttribute("errorMessage", "게시글 등록에 실패했습니다.");
-        return "redirect:/posts/create";
     }
 
     /**
