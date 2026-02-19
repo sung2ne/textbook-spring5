@@ -139,6 +139,13 @@
       <artifactId>spring-security-crypto</artifactId>
       <version>${spring.security.version}</version>
     </dependency>
+
+    <!-- Commons FileUpload -->
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.5</version>
+    </dependency>
   </dependencies>
 
   <!-- 빌드 설정 -->
