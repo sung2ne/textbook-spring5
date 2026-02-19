@@ -331,6 +331,33 @@
                 $('#card' + id).removeClass('d-none');
                 $('#commentUpdateForm' + id).addClass('d-none');
             });
+
+            // 댓글 삭제 버튼 클릭 이벤트
+            $(document).on('click', '.btn-delete-comment', function() {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    let id = $(this).data('id');
+
+                    $.ajax({
+                        url: '/comments/delete',
+                        type: 'POST',
+                        data: {
+                            'id': id
+                        },
+                        success: function(response) {
+                            if (response.result == 'ok') {
+                                getComments();
+                                alert('댓글이 삭제되었습니다.');
+                            } else {
+                                alert('댓글 삭제에 실패했습니다.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert('댓글 삭제 중 오류가 발생했습니다. 다시 시도해주세요.');
+                        }
+                    });
+                }
+            });
         });
     </script>
     <%--// 자바스크립트 --%>

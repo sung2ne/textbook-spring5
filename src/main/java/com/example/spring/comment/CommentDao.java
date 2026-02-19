@@ -100,4 +100,25 @@ public class CommentDao {
 
         return result;
     }
+
+    /**
+     * 댓글을 삭제하는 메서드
+     * MyBatis 매퍼(commentMapper.delete)를 호출하여 ID에 해당하는 댓글을 삭제함
+     *
+     * @param id 삭제할 댓글의 ID
+     * @return 삭제된 행 수 (성공 시 1, 실패 또는 예외 시 -1)
+     */
+    public int delete(int id) {
+        int result = -1;
+
+        try {
+            // commentMapper.xml의 <delete id="delete"> 구문 실행
+            result = sqlSession.delete("commentMapper.delete", id);
+        } catch (DataAccessException e) {
+            // 예외 발생 시 로그 출력
+            logger.error("댓글 삭제 오류 : {}", e.getMessage(), e);
+        }
+
+        return result;
+    }
 }

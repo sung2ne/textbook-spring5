@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 /**
  * 댓글 관련 비즈니스 로직을 처리하는 서비스 클래스
  * 컨트롤러와 DAO 사이에서 중간 역할을 수행
@@ -56,6 +55,16 @@ public class CommentService {
      */
     public boolean update(CommentDto comment) {
         int result = commentDao.update(comment);
+        return result > 0;
+    }
+
+    /**
+     * 댓글을 삭제하는 메서드
+     * @param commentId 삭제할 댓글 ID
+     * @return 삭제 성공 여부 (true: 성공, false: 실패)
+     */
+    public boolean delete(int commentId) {
+        int result = commentDao.delete(commentId);
         return result > 0;
     }
 }
