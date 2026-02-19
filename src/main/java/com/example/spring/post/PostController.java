@@ -1,6 +1,6 @@
 package com.example.spring.post;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -24,18 +25,30 @@ public class PostController {
 
     /**
      * 게시글 목록 화면 요청 처리 (GET 방식)
-     * @param model 뷰에 데이터를 전달하기 위한 객체
-     * @return "posts/list" 뷰 이름 (posts/list.jsp)
+     * - 사용자가 검색 조건(searchType, searchKeyword)을 입력하면 필터링된 게시글 목록을 조회
+     * - 검색 조건이 없으면 전체 게시글을 조회
+     * - 조회 결과와 검색 조건을 모델에 담아 뷰로 전달
+     *
+     * @param searchType 검색 기준 (예: "title", "content", "username"), null 허용
+     * @param searchKeyword 검색어, null 허용
+     * @param model 뷰에 전달할 데이터를 담는 객체
+     * @return 게시글 목록을 출력할 뷰 이름 ("posts/list.jsp")
      */
     @GetMapping("")
-    public String listGet(Model model) {
-        // 서비스 계층을 통해 게시글 목록을 가져옴
-        List<PostDto> posts = postService.list();
+    public String listGet(
+        @RequestParam(required = false) String searchType,
+        @RequestParam(required = false) String searchKeyword,
+        Model model
+    ) {
+        // 서비스 계층에서 게시글 목록 및 검색 조건 조회
+        Map<String, Object> result = postService.list(searchType, searchKeyword);
 
-        // "posts"라는 이름으로 게시글 목록 데이터를 모델에 담아 뷰로 전달
-        model.addAttribute("posts", posts);
+        // 모델에 게시글 목록과 검색 조건 담기
+        model.addAttribute("posts", result.get("posts"));
+        model.addAttribute("searchType", result.get("searchType"));
+        model.addAttribute("searchKeyword", result.get("searchKeyword"));
 
-        // posts/list.jsp 화면을 렌더링
+        // 게시글 목록 화면 렌더링
         return "posts/list";
     }
 
