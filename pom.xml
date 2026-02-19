@@ -37,6 +37,12 @@
             <artifactId>spring-context</artifactId>
             <version>${spring.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Servlet API -->
         <dependency>
@@ -85,11 +91,31 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- 데이터베이스 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.5</version>
+        </dependency>
+
+        <!-- HikariCP 데이터베이스 커넥션 풀 -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+
     </dependencies>
 
     <!-- 빌드 설정 -->
     <build>
-        <finalName>ROOT</finalName>
+        <finalName>ROOT</finalName>        
         <plugins>
             <!-- Maven 컴파일러 플러그인 -->
             <plugin>
@@ -103,7 +129,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven WAR 플러그인 -->
+            <!-- Maven 실행 플러그인 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -112,35 +138,6 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
-
-
-            <!-- ============================================== -->
-            <!-- [추가] ROOT.war 파일 자동 복사 플러그인         -->
-            <!-- mvn install 실행 시 Tomcat으로 자동 배포됩니다  -->
-            <!-- ============================================== -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- MacOS 환경: Tomcat 설치 경로에 맞게 수정하세요 -->
-                                <copy file="${project.build.directory}/${project.build.finalName}.war"
-                                    tofile="${user.home}/dev/apache-tomcat-9.0.97/webapps/ROOT.war"
-                                    overwrite="true"/>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- ============================================== -->
-
         </plugins>
     </build>
 </project>

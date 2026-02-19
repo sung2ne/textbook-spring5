@@ -7,7 +7,10 @@
     <!-- Spring 애플리케이션 컨텍스트 설정 -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring/root-context.xml</param-value>
+        <param-value>
+            /WEB-INF/spring/root-context.xml
+            /WEB-INF/spring/db-context.xml
+        </param-value>
     </context-param>
 
     <!-- Spring Container 리스너 설정 -->
@@ -25,13 +28,13 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-        
+
     <!-- DispatcherServlet의 URL 매핑 설정 -->
     <servlet-mapping>
         <servlet-name>appServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
-    
+
     <!-- 인코딩 필터 설정 -->
     <filter>
         <filter-name>encodingFilter</filter-name>
