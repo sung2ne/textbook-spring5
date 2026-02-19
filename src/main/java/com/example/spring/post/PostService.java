@@ -16,6 +16,16 @@ public class PostService {
     PostDao postDao;
 
     /**
+     * 비밀번호 검증 메서드
+     * @param post 사용자가 입력한 게시글 정보(ID, 비밀번호 포함)
+     * @return 비밀번호 일치 여부 (true: 일치, false: 불일치 또는 게시글 없음)
+     */
+    private boolean verifyPassword(PostDto post) {
+        PostDto originalPost = postDao.read(post.getId());
+        return originalPost != null && originalPost.getPassword().equals(post.getPassword());
+    }
+
+    /**
      * 게시글 목록을 조회하는 메서드
      * @return 게시글 리스트 (List<PostDto>)
      */
@@ -46,56 +56,30 @@ public class PostService {
 
     /**
      * 게시글을 수정하는 메서드
-     * - 존재 여부 확인
-     * - 비밀번호 일치 여부 확인
-     * - 성공 시 업데이트 처리
-     *
-     * @param post 사용자가 수정한 게시글 정보 (ID와 비밀번호 포함)
+     * - 비밀번호 검증 후 수정 처리
+     * @param post 수정할 게시글 정보 (ID, 비밀번호 포함)
      * @return 수정 성공 여부 (true: 성공, false: 실패)
      */
     public boolean update(PostDto post) {
-        // 기존 게시글 조회
-        PostDto originalPost = postDao.read(post.getId());
-
-        // 게시글이 존재하지 않으면 수정 실패
-        if (originalPost == null) {
+        if (!verifyPassword(post)) {
             return false;
         }
 
-        // 입력된 비밀번호와 기존 게시글의 비밀번호가 일치하지 않으면 수정 실패
-        if (!originalPost.getPassword().equals(post.getPassword())) {
-            return false;
-        }
-
-        // 비밀번호 일치 시 게시글 업데이트 수행
         int result = postDao.update(post);
         return result > 0;
     }
 
     /**
      * 게시글을 삭제하는 메서드
-     * - 존재 여부 확인
-     * - 비밀번호 일치 여부 확인
-     * - 일치하면 삭제 수행
-     *
+     * - 비밀번호 검증 후 삭제 처리
      * @param post 삭제할 게시글 정보 (ID, 비밀번호 포함)
      * @return 삭제 성공 여부 (true: 성공, false: 실패)
      */
     public boolean delete(PostDto post) {
-        // 1단계: 기존 게시글 조회
-        PostDto originalPost = postDao.read(post.getId());
-
-        // 2단계: 존재 여부 확인
-        if (originalPost == null) {
-            return false; // 게시글 없음
+        if (!verifyPassword(post)) {
+            return false;
         }
 
-        // 3단계: 비밀번호 일치 여부 확인
-        if (!originalPost.getPassword().equals(post.getPassword())) {
-            return false; // 비밀번호 불일치
-        }
-
-        // 4단계: 게시글 삭제 수행
         int result = postDao.delete(post.getId());
         return result > 0;
     }
