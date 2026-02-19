@@ -14,7 +14,6 @@ public class AuthPostDto {
     private String title;               // 게시글 제목
     private String content;             // 게시글 내용
     private String userId;              // 사용자 ID
-    private String secret;              // 비밀글 여부(Y, N)
 
     private Date createdAt;             // 게시글 작성 시간
     private Date updatedAt;             // 게시글 마지막 수정 시간
