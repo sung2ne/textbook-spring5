@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.spring.libs.Email;
 import com.example.spring.libs.Sms;
 import com.example.spring.user.UserDto;
 import com.example.spring.user.UserService;
@@ -90,7 +91,6 @@ public class AuthController {
      * 아이디 찾기 요청 처리 (POST 방식)
      * - 사용자가 입력한 정보(UserDto: 이름, 전화번호/이메일)를 기준으로 사용자 정보 조회
      * - 조회된 경우 해당 아이디를 FlashAttribute로 전달
-     * - 전화번호로 조회 시 SMS로 아이디 전송
      * - 조회되지 않은 경우 에러 메시지를 전달
      *
      * @param user 사용자 입력 정보 (username, phone 또는 email 포함)
@@ -104,10 +104,15 @@ public class AuthController {
         UserDto existsUser = userService.read(user);
 
         if (existsUser != null) {
-            // 전화번호가 입력된 경우 SMS로 아이디 전송
+            // 사용자 존재: 아이디를 문자로 전달
             if (user.getPhone() != null) {
                 Sms coolSMS = new Sms();
                 coolSMS.sendCoolsms("사용자 아이디는 " + existsUser.getUserId() + " 입니다.", user.getPhone());
+            }
+            // 사용자 존재: 아이디를 이메일로 전달
+            else if (user.getEmail() != null) {
+                Email emailService = new Email();
+                emailService.sendNaverEmail("아이디 찾기", "사용자 아이디는 " + existsUser.getUserId() + " 입니다.", user.getEmail());
             }
 
             // 사용자 존재: 아이디를 성공 메시지로 전달
@@ -137,7 +142,6 @@ public class AuthController {
      * 비밀번호 초기화 요청 처리 (POST 방식)
      * - 사용자 정보를 기반으로 사용자 존재 여부 확인
      * - 존재하는 경우 임시 비밀번호(6자리 숫자)로 비밀번호를 재설정하고 암호화 후 저장
-     * - 전화번호로 조회 시 임시 비밀번호를 SMS로 전송
      * - 초기화 결과에 따라 성공/실패 메시지를 FlashAttribute로 전달
      *
      * @param user 사용자 조회를 위한 정보 (이름 + 전화번호 or 이메일)
@@ -160,7 +164,7 @@ public class AuthController {
             boolean result = userService.update(existsUser);
 
             if (result) {
-                // 전화번호가 입력된 경우 SMS로 임시 비밀번호 전송
+                // 사용자 존재: 비밀번호를 문자로 전달
                 if (user.getPhone() != null) {
                     Sms coolSMS = new Sms();
                     coolSMS.sendCoolsms("초기화된 비밀번호는 " + newPassword + " 입니다.", user.getPhone());
