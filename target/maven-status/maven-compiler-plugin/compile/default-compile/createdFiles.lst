@@ -1,5 +1,6 @@
 com/example/spring/post/PostController.class
 com/example/spring/auth/AuthController.class
+com/example/spring/user/UserController.class
 com/example/spring/libs/Pagination.class
 com/example/spring/libs/Email$1.class
 com/example/spring/post/PostDao.class
