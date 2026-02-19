@@ -88,12 +88,16 @@
             title,
             content,
             username,
-            password
+            password,
+            file_name,
+            original_file_name
         ) VALUES (
             #{title},
             #{content},
             #{username},
-            #{password}
+            #{password},
+            #{fileName},
+            #{originalFileName}
         )
         ]]>
     </insert>
@@ -135,8 +139,7 @@
             title = #{title},         -- 게시글 제목 수정
             content = #{content},     -- 게시글 내용 수정
             username = #{username},   -- 작성자명 수정 (선택적)
-            password = #{password},   -- 비밀번호도 수정 가능
-            updated_at = NOW()        -- 수정 시각 갱신
+            password = #{password}    -- 비밀번호도 수정 가능
         WHERE
             id = #{id}                -- 수정할 게시글의 고유 ID
         LIMIT 1
