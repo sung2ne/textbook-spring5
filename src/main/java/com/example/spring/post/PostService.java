@@ -36,12 +36,11 @@ public class PostService {
     /**
      * 게시글을 등록하는 메서드
      * @param post 사용자가 작성한 게시글 정보
-     * @return 등록 성공 여부 (true: 성공, false: 실패)
+     * @return 등록한 게시글 ID
      */
-    public boolean create(PostDto post) {
-        // DAO를 호출하여 게시글을 DB에 저장하고 결과를 반환
+    public int create(PostDto post) {
         int result = postDao.create(post);
-        return result > 0; // 1개 이상 행이 삽입되면 성공으로 판단
+        return result;
     }
 
     /**
