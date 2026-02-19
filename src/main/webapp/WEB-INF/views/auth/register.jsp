@@ -124,20 +124,7 @@
                     userId: {
                         required: true,
                         minlength: 6,
-                        maxlength: 20,
-                        remote: {
-                            url: '/auth/check-user-id',
-                            type: 'post',
-                            data: {
-                                userId: function() {
-                                    return $('#userId').val();
-                                },
-                            },
-                            dataFilter: function(response) {
-                                const data = JSON.parse(response);
-                                return !data.exists;
-                            }
-                        }
+                        maxlength: 20
                     },
                     password: {
                         required: true,
@@ -153,46 +140,19 @@
                         maxlength: 10
                     },
                     phone: {
-                        required: true,
-                        remote: {
-                            url: '/auth/check-phone',
-                            type: 'post',
-                            data: {
-                                phone: function() {
-                                    return $('#phone').val();
-                                },
-                            },
-                            dataFilter: function(response) {
-                                const data = JSON.parse(response);
-                                return !data.exists;
-                            }
-                        }
+                        required: true
                     },
                     email: {
                         required: true,
                         email: true,
-                        maxlength: 50,
-                        remote: {
-                            url: '/auth/check-email',
-                            type: 'post',
-                            data: {
-                                email: function() {
-                                    return $('#email').val();
-                                },
-                            },
-                            dataFilter: function(response) {
-                                const data = JSON.parse(response);
-                                return !data.exists;
-                            }
-                        }
+                        maxlength: 50
                     }
                 },
                 messages: {
                     userId: {
                         required: '아이디를 입력하세요.',
                         minlength: '아이디는 6자 이상 12자 이하로 입력하세요.',
-                        maxlength: '아이디는 6자 이상 12자 이하로 입력하세요.',
-                        remote: '이미 사용중인 아이디입니다.'
+                        maxlength: '아이디는 6자 이상 12자 이하로 입력하세요.'
                     },
                     password: {
                         required: '비밀번호를 입력하세요.',
@@ -208,14 +168,12 @@
                         maxlength: '이름은 2자 이상 4자 이하로 입력하세요.'
                     },
                     phone: {
-                        required: '전화번호를 입력하세요.',
-                        remote: '이미 사용중인 전화번호입니다.'
+                        required: '전화번호를 입력하세요.'
                     },
                     email: {
                         required: '이메일을 입력하세요.',
                         email: '올바른 이메일 형식이 아닙니다.',
-                        maxlength: '이메일은 최대 50자까지 가능합니다.',
-                        remote: '이미 사용중인 이메일입니다.'
+                        maxlength: '이메일은 최대 50자까지 가능합니다.'
                     }
                 },
                 errorClass: 'is-invalid',
