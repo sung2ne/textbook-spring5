@@ -286,19 +286,49 @@ public class PostController {
 
     /**
      * 게시글 삭제 요청 처리 (POST 방식)
+     * - 게시글 ID와 비밀번호를 기반으로 삭제 요청 처리
+     * - 비밀번호 검증에 성공하면 게시글 삭제 및 첨부파일도 함께 삭제
+     * - 실패 시 또는 예외 발생 시 상세 페이지로 리다이렉트하고 에러 메시지 전달
+     *
+     * @param id 삭제할 게시글 ID (경로 변수)
+     * @param post 사용자 입력 정보 (비밀번호 포함)
+     * @param redirectAttributes 리다이렉트 시 메시지 전달용 객체
+     * @return 삭제 성공 시 목록 페이지로, 실패 시 상세 페이지로 리다이렉트
      */
     @PostMapping("/{id}/delete")
     public String deletePost(@PathVariable("id") int id, PostDto post, RedirectAttributes redirectAttributes) {
-        post.setId(id);
-        boolean deleted = postService.delete(post);
+        String uploadPath = uploadPathByOS(); // OS에 따른 업로드 경로 설정
+        post.setId(id); // URL 경로의 ID를 post 객체에 설정
 
-        if (deleted) {
-            redirectAttributes.addFlashAttribute("successMessage", "게시글이 삭제되었습니다.");
-            return "redirect:/posts";
+        try {
+            // 기존 게시글 조회 (첨부파일 확인용)
+            PostDto originalPost = postService.read(id);
+
+            // 첨부파일이 존재하는 경우 서버에서 삭제
+            if (originalPost != null && originalPost.getFileName() != null) {
+                Path filePath = Paths.get(uploadPath).resolve(originalPost.getFileName());
+                if (Files.exists(filePath)) {
+                    Files.delete(filePath);
+                }
+            }
+
+            // 게시글 삭제 처리 (비밀번호 검증 포함)
+            boolean deleted = postService.delete(post);
+
+            if (deleted) {
+                redirectAttributes.addFlashAttribute("successMessage", "게시글이 삭제되었습니다.");
+                return "redirect:/posts";
+            }
+
+            // 삭제 실패 (비밀번호 불일치 등)
+            redirectAttributes.addFlashAttribute("errorMessage", "게시글 삭제에 실패했습니다. (비밀번호 확인)");
+            return "redirect:/posts/" + id;
+
+        } catch (IOException e) {
+            // 파일 삭제 중 오류 발생
+            redirectAttributes.addFlashAttribute("errorMessage", "업로드 파일 삭제에 실패했습니다.");
+            return "redirect:/posts/" + id;
         }
-
-        redirectAttributes.addFlashAttribute("errorMessage", "게시글 삭제에 실패했습니다. (비밀번호 확인)");
-        return "redirect:/posts/" + id;
     }
 
     /**
