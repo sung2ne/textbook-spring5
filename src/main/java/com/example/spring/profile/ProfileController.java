@@ -107,4 +107,15 @@ public class ProfileController {
         redirectAttributes.addFlashAttribute("errorMessage", "프로필 수정에 실패했습니다.");
         return "redirect:/profile/update-profile";
     }
+
+    /**
+     * 비밀번호 수정 화면 요청 처리 (GET 방식)
+     * - 로그인된 사용자가 비밀번호를 변경할 수 있는 화면을 보여줌
+     *
+     * @return 비밀번호 수정 폼 뷰 이름 ("profile/updatePassword.jsp")
+     */
+    @GetMapping("/update-password")
+    public String updatePasswordGet() {
+        return "profile/updatePassword";
+    }
 }
