@@ -124,7 +124,7 @@
                     userId: {
                         required: true,
                         minlength: 6,
-                        maxlength: 12,
+                        maxlength: 20,
                         remote: {
                             url: '/auth/check-user-id',
                             type: 'post',
@@ -153,7 +153,20 @@
                         maxlength: 10
                     },
                     phone: {
-                        required: true
+                        required: true,
+                        remote: {
+                            url: '/auth/check-phone',
+                            type: 'post',
+                            data: {
+                                phone: function() {
+                                    return $('#phone').val();
+                                },
+                            },
+                            dataFilter: function(response) {
+                                const data = JSON.parse(response);
+                                return !data.exists;
+                            }
+                        }
                     },
                     email: {
                         required: true,
@@ -182,7 +195,8 @@
                         maxlength: '이름은 2자 이상 4자 이하로 입력하세요.'
                     },
                     phone: {
-                        required: '전화번호를 입력하세요.'
+                        required: '전화번호를 입력하세요.',
+                        remote: '이미 사용중인 전화번호입니다.'
                     },
                     email: {
                         required: '이메일을 입력하세요.',
@@ -202,6 +216,6 @@
             });
         });
     </script>
-    <%--// script --%>
+    <%--// 자바스크립트 --%>
 </body>
 </html>

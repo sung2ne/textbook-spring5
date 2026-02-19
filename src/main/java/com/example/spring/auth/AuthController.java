@@ -246,4 +246,28 @@ public class AuthController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
+
+    /**
+     * 사용자 전화번호 중복 체크 (POST 방식, AJAX 처리)
+     * - 클라이언트에서 입력한 전화번호가 이미 등록된 사용자에게 있는지 확인
+     * - JSON 형식으로 결과 반환: { "exists": true } 또는 { "exists": false }
+     *
+     * @param user 전화번호를 포함한 사용자 정보(UserDto.phone)
+     * @return 중복 여부를 담은 JSON 응답
+     */
+    @PostMapping("/check-phone")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkPhonePost(UserDto user) {
+        // 입력된 전화번호 기준으로 사용자 조회
+        UserDto existsUser = userService.read(user);
+
+        // 응답 데이터 구성
+        Map<String, Object> response = new HashMap<>();
+        response.put("exists", existsUser != null);
+
+        // JSON 형식으로 응답 반환
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
 }
