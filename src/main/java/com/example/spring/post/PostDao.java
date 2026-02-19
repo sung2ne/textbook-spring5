@@ -11,15 +11,16 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component // 해당 클래스가 Spring의 Bean으로 등록되도록 지정
 public class PostDao {
     
+    // 로그 출력을 위한 Logger 객체 생성
     private static final Logger logger = LoggerFactory.getLogger(PostDao.class);
 
-    @Autowired
+    @Autowired // Spring이 JdbcTemplate 객체를 자동으로 주입
     JdbcTemplate jdbcTemplate;
 
-    @Autowired
+    @Autowired // Spring이 SqlSessionTemplate 객체를 자동으로 주입
     private SqlSessionTemplate sqlSession;
 
     /**
@@ -32,8 +33,10 @@ public class PostDao {
         List<PostDto> posts = null;
 
         try {
+            // MyBatis의 매퍼 네임스페이스(postMapper)와 id(list)를 지정하여 쿼리 실행
             posts = sqlSession.selectList("postMapper.list");
         } catch (DataAccessException e) {
+            // 데이터 조회 중 오류가 발생한 경우 로그 출력
             logger.error("게시글 목록 오류 : {}", e.getMessage(), e);
         }
 
@@ -63,19 +66,21 @@ public class PostDao {
     }
 
     /**
-     * 게시글 ID를 기준으로 게시글을 조회하는 메서드
+     * 게시글 ID를 기준으로 단건 조회하는 메서드
+     * MyBatis 매퍼(postMapper.read)를 호출하여 게시글 1건을 조회함
+     *
      * @param id 조회할 게시글의 id
-     * @return 게시글 정보(PostDto), 조회 실패 시 null 반환
+     * @return PostDto 객체 (조회된 게시글), 실패 시 null 반환
      */
     public PostDto read(int id) {
-        String query = "SELECT id, title, content, username, password, created_at, updated_at FROM posts WHERE id = ? LIMIT 1";
-
         PostDto post = null;
 
         try {
-            post = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(PostDto.class), id);
+            // postMapper.xml에 정의된 <select id="read"> 구문 실행
+            post = sqlSession.selectOne("postMapper.read", id);
         } catch (DataAccessException e) {
-            logger.error("게시글 조회 오류 (id: {}): {}", id, e.getMessage(), e);
+            // SQL 실행 중 예외 발생 시 로그 출력
+            logger.error("게시글 보기 오류 : {}", e.getMessage(), e);
         }
 
         return post;
