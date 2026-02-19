@@ -1,5 +1,7 @@
 package com.example.spring.comment;
 
+import java.util.List;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,5 +38,25 @@ public class CommentDao {
             logger.error("댓글 등록 오류 : {}", e.getMessage(), e);
             return -1;
         }
+    }
+
+    /**
+     * 댓글 목록을 조회하는 메서드
+     *
+     * @param authPostId 게시글 번호
+     * @return 댓글 리스트 (List<CommentDto>), 실패 시 null 또는 빈 리스트 반환
+     */
+    public List<CommentDto> list(int authPostId) {
+        List<CommentDto> comments = null;
+
+        try {
+            // MyBatis 매퍼(commentMapper.xml)의 list 쿼리 실행
+            comments = sqlSession.selectList("commentMapper.list", authPostId);
+        } catch (DataAccessException e) {
+            // 예외 발생 시 로그 출력
+            logger.error("댓글 목록 오류 : {}", e.getMessage(), e);
+        }
+
+        return comments;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.spring.comment;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -43,6 +46,28 @@ public class CommentController {
         // 응답용 데이터 생성
         Map<String, Object> response = new HashMap<>();
         response.put("result", createdId > 0 ? "ok" : "error");
+
+        // JSON 형식으로 결과 반환
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
+
+    /**
+     * 댓글 목록
+     *
+     * @RequestParam authPostId 게시글 ID
+     * @return JSON 형식 응답 (result: "ok" 또는 "error")
+     */
+    @GetMapping("")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> listGet(@RequestParam int authPostId) {
+        // 댓글 목록
+        List<CommentDto> comments = commentService.list(authPostId);
+
+        // 응답용 데이터 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("comments", comments);
 
         // JSON 형식으로 결과 반환
         return ResponseEntity.ok()

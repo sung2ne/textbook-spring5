@@ -1,5 +1,7 @@
 package com.example.spring.comment;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +25,17 @@ public class CommentService {
         // DAO를 호출하여 댓글을 DB에 저장하고 결과를 반환
         int result = commentDao.create(comment);
         return result;
+    }
+
+    /**
+     * 댓글 목록을 조회하고 반환하는 메서드
+     *
+     * @param authPostId 게시글 번호
+     * @return 게시글에 해당하는 댓글 목록
+     */
+    public List<CommentDto> list(int authPostId) {
+        // 댓글 목록 조회
+        List<CommentDto> comments = commentDao.list(authPostId);
+        return comments;
     }
 }
