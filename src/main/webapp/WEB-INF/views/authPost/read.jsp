@@ -182,11 +182,79 @@
                             }
 
                             commentsDiv += '</div>';
+
+                            // 댓글 수정 폼
+                            commentsDiv += '<form class="comment-update-form d-none" id="commentUpdateForm' + comment.id + '" data-id="' + comment.id + '">';
+                            commentsDiv += '<div class="card mb-3">';
+                            commentsDiv += '<div class="card-body">';
+                            commentsDiv += '<div class="mb-3">';
+                            commentsDiv += '<textarea class="form-control" id="updateContent' + comment.id + '" name="updateContent' + comment.id + '" rows="5" placeholder="댓글 내용을 입력하세요">' + comment.content + '</textarea>';
+                            commentsDiv += '</div>';
+                            commentsDiv += '</div>';
+                            commentsDiv += '<div class="card-footer">';
+                            commentsDiv += '<div>';
+                            commentsDiv += '<button type="submit" class="btn btn-warning me-2">댓글 수정</button>';
+                            commentsDiv += '<button type="button" class="btn btn-secondary cancel-update-comment" data-id="' + comment.id + '">수정 취소</button>';
+                            commentsDiv += '</div>';
+                            commentsDiv += '</div>';
+                            commentsDiv += '</div>';
+                            commentsDiv += '</form>';
                         }
 
                         $('#commentsDiv').empty();
                         $('#commentsDiv').html(commentsDiv);
                         $('#createContent').val('');
+
+                        // 각 수정 폼에 validate 적용
+                        $('.comment-update-form').each(function() {
+                            const formId = $(this).attr('id');
+                            const commentId = $(this).data('id');
+
+                            $(this).validate({
+                                rules: {
+                                    ['updateContent' + commentId]: {
+                                        required: true,
+                                        minlength: 2,
+                                        maxlength: 1000
+                                    }
+                                },
+                                messages: {
+                                    ['updateContent' + commentId]: {
+                                        required: '댓글을 입력하세요.',
+                                        minlength: '댓글은 최소 2자 이상 입력하세요.',
+                                        maxlength: '댓글은 최대 1000자 이하로 입력하세요.'
+                                    }
+                                },
+                                errorClass: 'is-invalid',
+                                validClass: 'is-valid',
+                                errorPlacement: function(error, element) {
+                                    error.addClass('invalid-feedback');
+                                    element.closest('.mb-3').append(error);
+                                },
+                                submitHandler: function(form) {
+                                    $.ajax({
+                                        url: '/comments/update',
+                                        type: 'POST',
+                                        data: {
+                                            'id': commentId,
+                                            'content': $('#updateContent' + commentId).val()
+                                        },
+                                        success: function(response) {
+                                            if (response.result == 'ok') {
+                                                getComments();
+                                                alert('댓글이 수정되었습니다.');
+                                            } else {
+                                                alert('댓글 수정에 실패했습니다.');
+                                            }
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('Error:', error);
+                                            alert('댓글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
+                                        }
+                                    });
+                                }
+                            });
+                        });
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
@@ -248,6 +316,20 @@
                         }
                     });
                 }
+            });
+
+            // 댓글 수정 버튼 클릭 이벤트
+            $(document).on('click', '.btn-update-comment', function() {
+                let id = $(this).data('id');
+                $('#card' + id).addClass('d-none');
+                $('#commentUpdateForm' + id).removeClass('d-none');
+            });
+
+            // 댓글 수정 취소 버튼 클릭 이벤트
+            $(document).on('click', '.cancel-update-comment', function() {
+                let id = $(this).data('id');
+                $('#card' + id).removeClass('d-none');
+                $('#commentUpdateForm' + id).addClass('d-none');
             });
         });
     </script>
