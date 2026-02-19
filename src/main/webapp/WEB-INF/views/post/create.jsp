@@ -53,7 +53,7 @@
                                 <label for="password" class="form-label">비밀번호<span class="text-danger">*</span></label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="비밀번호를 입력하세요">
                             </div>     
-                            <%--// 비밀번호 --%>
+                            <%--// 비밀번호 --%>               
                         </div>
                         <div class="card-footer">
                             <div>
@@ -74,32 +74,60 @@
     <script>
         $(document).ready(function() {
             // 게시글 폼 검증
-            $('#createForm').submit(function(event) {
-                if ($('#title').val() == '') {
-                    alert('제목을 입력하세요.');
-                    $('#title').focus();
-                    return false;
+            $('#createForm').validate({
+                rules: {
+                    title: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100
+                    },
+                    content: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 1000
+                    },
+                    username: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 10
+                    },
+                    password: {
+                        required: true,
+                        minlength: 4,
+                        maxlength: 20
+                    }
+                },
+                messages: {
+                    title: {
+                        required: '제목을 입력하세요.',
+                        minlength: '제목은 최소 2자 이상 입력하세요.',
+                        maxlength: '제목은 최대 100자 이하로 입력하세요.'
+                    },
+                    content: {
+                        required: '내용을 입력하세요.',
+                        minlength: '내용은 최소 2자 이상 입력하세요.',
+                        maxlength: '내용은 최대 1000자 이하로 입력하세요.'
+                    },
+                    username: {
+                        required: '작성자를 입력하세요.',
+                        minlength: '작성자는 최소 2자 이상 입력하세요.',
+                        maxlength: '작성자는 최대 10자 이하로 입력하세요.'
+                    },
+                    password: {
+                        required: '비밀번호를 입력하세요.',
+                        minlength: '비밀번호는 최소 4자 이상 입력하세요.',
+                        maxlength: '비밀번호는 최대 20자 이하로 입력하세요.'
+                    }
+                },
+                errorClass: 'is-invalid',
+                validClass: 'is-valid',
+                errorPlacement: function(error, element) {
+                    error.addClass('invalid-feedback');
+                    element.closest('.mb-3').append(error);
+                },
+                submitHandler: function(form) {
+                    form.submit();
                 }
-
-                if ($('#content').val() == '') {
-                    alert('내용을 입력하세요.');
-                    $('#content').focus();
-                    return false;
-                }
-
-                if ($('#username').val() == '') {
-                    alert('작성자를 입력하세요.');
-                    $('#username').focus();
-                    return false;
-                }
-
-                if ($('#password').val() == '') {
-                    alert('비밀번호를 입력하세요.');
-                    $('#password').focus();
-                    return false;
-                }
-
-                return true;
             });
         });
     </script>
