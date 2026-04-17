@@ -9,7 +9,7 @@
 
 ## 교재 링크
 
-https://wikidocs.net/book/16994
+https://text.ibetter.kr/spring5
 
 ## 기술 스택
 
